@@ -1,1 +1,4 @@
-# main python runner
+from fastapi import FastAPI
+
+
+app = FastAPI()
