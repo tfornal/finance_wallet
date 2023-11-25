@@ -4,11 +4,13 @@ sys.path.append("..")
 import models
 from database import engine, SessionLocal
 from fastapi import Depends, HTTPException, APIRouter, Request, Form, status
-from fastapi.responses import JSONResponse  # , HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
-from .authentication import get_current_user
+
+from .users import get_current_user
+from fastapi.templating import Jinja2Templates
 
 ### to bedzie ptorzebne gdy bede przechodzil na html
 # from fastapi.templating import Jinja2Templates
@@ -27,7 +29,9 @@ def get_db():
 
 
 models.Base.metadata.create_all(bind=engine)
-# templates = Jinja2Templates(directory="templates") #### to bedzie potrzebne jak bede przechodzil na html
+templates = Jinja2Templates(
+    directory="templates"
+)  #### to bedzie potrzebne jak bede przechodzil na html
 
 
 @router.get("/", response_class=JSONResponse)
@@ -44,23 +48,30 @@ async def get_expenses_of_all_users(request: Request, db: Session = Depends(get_
         for expense in expenses
     ]
     return expenses_data
+    # templates.TemplateResponse(
+    # "home.html", {"request": request, "expenses": expenses}
+    # )
 
 
 @router.get("/{user_id}", response_class=JSONResponse)
 async def get_expenses_by_user(
     request: Request, user_id: int, db: Session = Depends(get_db)
 ):
-    expenses = db.query(models.Wallet).filter(models.Wallet.owner_id == user_id).all()
+    all_expenses = (
+        db.query(models.Wallet).filter(models.Wallet.owner_id == user_id).all()
+    )
     expenses_data = [
         {
             "id": expense.id,
-            "description": expense.description,
             "price": expense.price,
+            "description": expense.description,
             "owner_id": expense.owner_id,
         }
-        for expense in expenses
+        for expense in all_expenses
     ]
-    return expenses_data
+    if len(expenses_data) != 0:  # is not None:
+        return expenses_data
+    raise HTTPException(status_code=404, detail="Expenses not found.")
 
 
 @router.get("/sum/{user_id}", response_class=JSONResponse)
@@ -85,19 +96,19 @@ async def get_purchase_sum(
 @router.post("/add-expense", response_class=JSONResponse)
 async def create_expense(
     request: Request,
-    description: str = Form(...),
     price: float = Form(...),
+    description: str = Form(...),
+    category: str = Form(...),
     owner_id: int = Form(...),
     db: Session = Depends(get_db),
 ):
     wallet_model = models.Wallet()
-
-    wallet_model.description = description
     wallet_model.price = price
+    wallet_model.description = description
+    wallet_model.category = category
     wallet_model.owner_id = owner_id
     db.add(wallet_model)
     db.commit()
-    return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
 
 
 @router.put("/edit-expense/{expense_id}", response_class=JSONResponse)
@@ -115,11 +126,9 @@ async def edit_expense(
     # wallet_model = models.Wallet()
     wallet_model.description = description
     wallet_model.price = price
-    wallet_model.owner_id = (
-    )
+    wallet_model.owner_id = ()
     db.add(wallet_model)
     db.commit()
-    return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
 
 
 @router.get("/delete/{expense_id}", response_class=JSONResponse)
@@ -131,4 +140,3 @@ async def delete_expense(
         return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
     db.query(models.Wallet).filter(models.Wallet.id == expense_id).delete()
     db.commit()
-    return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
