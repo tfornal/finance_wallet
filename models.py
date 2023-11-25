@@ -20,8 +20,9 @@ class Wallet(Base):
     __tablename__ = "wallet"
 
     id = Column(Integer, primary_key=True, index=True)
-    description = Column(String)
     price = Column(Float)
+    description = Column(String)
+    category = Column(String)
     owner_id = Column(Integer, ForeignKey("users.person_id"))
 
     owner = relationship("Users", back_populates="expenses")
