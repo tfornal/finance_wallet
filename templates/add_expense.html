@@ -1,0 +1,109 @@
+{% include 'layout.html' %}
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            Add expense to your wallet
+        </div>
+
+        <div class="card-body">
+            <form method="POST" id="expenseForm">
+                <div class="form-group">
+                    <label for="data">Select date:</label>
+                    <div class="input-group">
+                        <input type="date" id="data" name="data" class="form-control" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <i class="fas fa-calendar-alt"></i> <!-- Ikona kalendarza FontAwesome -->
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="text" class="form-control" id="amount" name="price"
+                           required pattern="\d+(\.\d{1,2})?">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="3" name="description"
+                              required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fa-solid fa-fingerprint"></i> <!-- Ikona kategorii (FontAwesome) -->
+                            </span>
+                        </div>
+                        <select id="category" name="category" class="custom-select" required>
+                            <option value="car">Car</option>
+                            <option value="house">House</option>
+                            <option value="bills">Bills</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- New Category Input -->
+                <div class="form-group" id="newCategoryLabel">
+                    <label>New Category</label>
+                    <input type="text" class="form-control" id="newCategory" name="newCategory">
+                </div>
+
+                <button type="submit" class="btn btn-success">Add new expense</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Hide the new category input initially
+        document.getElementById("newCategoryLabel").style.display = "none";
+        document.getElementById("newCategory").style.display = "none";
+
+        // Handle the change of selected category
+        document.getElementById("category").addEventListener("change", function() {
+            var newCategoryLabel = document.getElementById("newCategoryLabel");
+            var newCategoryInput = document.getElementById("newCategory");
+
+            // If "Other" is selected, show the new category input field
+            if (this.value === "other") {
+                newCategoryLabel.style.display = "block";
+                newCategoryInput.style.display = "block";
+            } else {
+                // Otherwise, hide the input field
+                newCategoryLabel.style.display = "none";
+                newCategoryInput.style.display = "none";
+            }
+        });
+
+        // Handle the form submission
+        document.getElementById("expenseForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // Get values from the form
+            var amount = document.getElementById("amount").value;
+            var category = document.getElementById("category").value;
+            var newCategory = document.getElementById("newCategory").value;
+
+            // If "Other" is selected, use the new category
+            if (category === "other") {
+                category = newCategory;
+            }
+
+            // Add your code here to handle the expense data, e.g., save it to a database
+            console.log("Added expense:", { amount, category });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById("data").value = today;
+    });
+</script>
