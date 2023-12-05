@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='/css/base.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='/css/bootstrap.css') }}">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Personal wallet</title>
+    <link rel="icon" href="{{ url_for('static', path='/images/wallet.png') }}" type="image/x-icon">
+</head>
+<body style = "background-color: rgb(62, 56, 119);">
+
+{% include "navigation_bar.html" %}
+
+{% block content %}
+
+{% endblock %}
+
+
+<script src="{{ url_for('static', path='/js/jquery-slim.js') }}"></script>
+<script src="{{ url_for('static', path='/js/popper.js') }}"></script>
+<script src="{{ url_for('static', path='/js/bootstrap.js') }}"></script>
+</body>
+</html>
