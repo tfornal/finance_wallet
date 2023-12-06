@@ -99,13 +99,11 @@ async def create_expense(
     db: Session = Depends(get_db),
 ):
     # breakpoint()
-    expense_model = models.Wallet()
-
     db.query(models.Wallet).filter(models.Wallet.id == expense_id).update(
         {
-            "title": expense_model.title,
-            "price": expense_model.price,
-            "category": expense_model.category,
+            "title": title,
+            "price": price,
+            "category": category,
             # "date": expense_model.date,
             # Dodaj inne kolumny, które chcesz zaktualizować
         }
