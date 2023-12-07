@@ -4,7 +4,7 @@ sys.path.append("..")
 import models
 from database import engine, SessionLocal
 from fastapi import Depends, HTTPException, APIRouter, Request, Form, status
-from fastapi.responses import JSONResponse  # , HTMLResponse
+from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -12,22 +12,20 @@ from starlette.responses import RedirectResponse
 from pydantic import BaseModel
 from .authorization import get_current_user, hash_password, oauth2_bearer
 
-# do autentykacji ponizej
 from datetime import datetime, timedelta
 from typing import Annotated
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext  # allows to hash password
 
+from fastapi.templating import Jinja2Templates
+
+templates = Jinja2Templates(directory="templates")
+
 
 SECRET_KEY = "dacee2503eaabfe54722dd00158df4f2bcf52a2f78bfdf74e73ca8194754c6cd"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 10
-
-
-### to bedzie ptorzebne gdy bede przechodzil na html
-# from fastapi.templating import Jinja2Templates
-
 
 router = APIRouter(
     prefix="/user",
@@ -89,25 +87,53 @@ async def create_user(
     db.commit()
 
 
-@router.get("/", response_class=JSONResponse)
-async def get_all_users(request: Request, db: Session = Depends(get_db)):
-    users_model = db.query(models.Users).all()
-    all_users = [{"username": user.username} for user in users_model]
-    return all_users
+@router.get("/change_password", response_class=HTMLResponse)
+async def change_password(request: Request):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+    return templates.TemplateResponse("change_password.html", {"request": request})
 
 
-@router.delete("/{username_param}", response_class=JSONResponse)
+@router.post("/change_password", response_class=HTMLResponse)
+async def change_password_commit(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    new_password: str = Form(...),
+):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+
+    user_model = (
+        db.query(models.Users).filter(models.Users.id == user.get("id")).first()
+    )
+
+    if user_model is None:
+        return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+
+    validation = validate_password(password, user_model.hashed_password)
+
+    if not validate_password:
+        return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+    msg = "PAssword changed successfully!"
+    return templates.TemplateResponse(
+        "change_password.html", {"request": request, "msg": msg}
+    )
+
+
+@router.get("/delete/{user_id}", response_class=HTMLResponse)
 async def delete_user(
     request: Request,
-    user: user_dependency,
     username: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    user = await get_current_user(request)
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed!"
-        )
+        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+
     user_to_delete = (
         db.query(models.Users).filter(models.Users.username == username).first()
     )
@@ -115,33 +141,6 @@ async def delete_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, details="User not found."
         )
+
     db.query(models.Users).filter(models.Users.username == username).delete()
     db.commit()
-
-
-# @router.post("/create", response_class=JSONResponse)
-# async def register_user(
-#     request: Request,
-#     username: str = Form(...),
-#     email: str = Form(...),
-#     password: str = Form(...),
-#     password2: str = Form(...),
-#     db: Session = Depends(get_db),
-# ):
-#     validation2 = db.query(models.Users).filter(models.Users.email == email).first()
-#     validation1 = (
-#         db.query(models.Users).filter(models.Users.username == username).first()
-#     )
-
-#     if validation1 is not None or validation2 is not None:
-#         raise HTTPException(status_code=404, detail="juz istnieje")
-#     if password != password2:
-#         raise HTTPException(status_code=404, detail="zle haslo")
-
-#     users_model = models.Users()
-#     users_model.email = email
-#     users_model.username = username
-#     users_model.hashed_password = encrypt_password(password)
-#     db.add(users_model)
-#     db.commit()
-#     return users_model

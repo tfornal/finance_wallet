@@ -1,3 +1,5 @@
+##TODO expiration of token in get_current_user - ustawienie, aby wylogowal po wygasnieciu tokena;
+
 from datetime import timedelta, datetime
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from pydantic import BaseModel
@@ -9,12 +11,10 @@ import models
 from typing import Annotated, Optional
 from starlette.responses import RedirectResponse
 
-## authorization
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 
-# do html to jest potrzebne
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/authorization", tags=["authorization"])
 
 SECRET_KEY = "ac9cfe2bb4a5036d00c472681c0ec91041a0a6eb88f817cb59d5e2a3071ff5cd"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 100
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="authorization/token")
@@ -82,9 +82,6 @@ async def login_for_access_token(
     response.set_cookie(key="access_token", value=token, httponly=True)
     return True
 
-    # return True
-    # return {"access_token": token, "token_type": "bearer"}
-
 
 @router.get("/", response_class=HTMLResponse)
 async def authentication_page(request: Request):
@@ -137,6 +134,10 @@ def create_access_token(username: str, user_id: int, validation_time: timedelta)
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
+def is_token_expired():
+    pass
+
+
 async def get_current_user(
     # token: token_dependency,  ########### jesli usune token_dependency - strace klodke
     # jesli wiec to usuniemy, to stworzy sie ciasteczko i tak, wiec pewnie trzeba to wywalic i stworzyc osobna
@@ -152,10 +153,7 @@ async def get_current_user(
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
         if username is None or user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                details="User validation failed.",
-            )
+            logout(request)
         return {"username": username, "id": user_id}
     except JWTError:
         raise HTTPException(status_code=404, detail="Not found")
@@ -176,19 +174,6 @@ async def register(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 
-# @router.post("/register", response_class=HTMLResponse)
-# async def register(
-#     request: Request,
-#     email: str = Form(...),
-#     username: str = Form(...),
-#     password: str = Form(...),
-# ):
-#     msg = "Register successful"
-#     response = templates.TemplateResponse("home.html", {"request": request, "msg": msg})
-#     response.set_cookie(key="access_token", value=token, httponly=True)
-#     return response
-
-
 @router.post("/register", response_class=JSONResponse)
 async def register_user(
     request: Request,
@@ -202,6 +187,7 @@ async def register_user(
     validation1 = (
         db.query(models.Users).filter(models.Users.username == username).first()
     )
+    ##TODO PRZEKIEROWAC DO HTML
     if validation1 is not None or validation2 is not None:
         raise HTTPException(status_code=404, detail="juz istnieje")
     if password != password2:
