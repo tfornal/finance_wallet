@@ -17,7 +17,6 @@ from typing import Annotated
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext  # allows to hash password
-
 from fastapi.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="templates")
@@ -95,32 +94,92 @@ async def change_password(request: Request):
     return templates.TemplateResponse("change_password.html", {"request": request})
 
 
+# @router.post("/change_password", response_class=HTMLResponse)
+# async def change_password_commit(
+#     request: Request,
+#     email: str = Form(...),
+#     password: str = Form(...),
+#     new_password: str = Form(...),
+#     repeat_new_password: str = Form(...),
+#     db: Session = Depends(get_db),
+# ):
+#     user = await get_current_user(request)
+#     if user is None:
+#         return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+
+#     user_model = (
+#         db.query(models.Users).filter(models.Users.user_id == user.get("id")).first()
+#     )
+
+#     if user_model is None:
+#         return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+
+#     validation = validate_password(password, user_model.hashed_password)
+
+#     if not validation:
+#         return RedirectResponse(
+#             url="/user/change_password", status_code=status.HTTP_302_FOUND
+#         )
+
+#     if new_password != repeat_new_password:
+#         msg = "Password incorrect!"
+
+#         return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+#     encrypted_password = encrypt_password(new_password)
+#     user_model.hashed_password = encrypted_password
+#     db.commit()
+#     msg = "Password changed successfully!"
+
+#     return templates.TemplateResponse(
+#         "change_password.html", {"request": request, "msg": msg}
+#     )
+
+
 @router.post("/change_password", response_class=HTMLResponse)
 async def change_password_commit(
     request: Request,
     email: str = Form(...),
     password: str = Form(...),
     new_password: str = Form(...),
+    repeat_new_password: str = Form(...),
+    db: Session = Depends(get_db),
 ):
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
 
     user_model = (
-        db.query(models.Users).filter(models.Users.id == user.get("id")).first()
+        db.query(models.Users).filter(models.Users.user_id == user.get("id")).first()
     )
-
+    ### TODO - warunek sprawdzanie czy user/email istnieje
     if user_model is None:
-        return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+        return HTTPException(status_code=404, detail="User not found")
 
-    validation = validate_password(password, user_model.hashed_password)
+    # Validate the old password
+    if not validate_password(password, user_model.hashed_password):
+        msg = "Current password is incorrect!"
+        print(msg)
+        return templates.TemplateResponse(
+            "change_password.html", {"request": request, "msg": msg}
+        )
 
-    if not validate_password:
-        return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
-    msg = "PAssword changed successfully!"
-    return templates.TemplateResponse(
-        "change_password.html", {"request": request, "msg": msg}
+    ### TODO checking password but already encrypted
+    if encrypt_password(new_password) != encrypt_password(repeat_new_password):
+        msg = "New passwords do not match!"
+        return templates.TemplateResponse(
+            "change_password.html", {"request": request, "msg": msg}
+        )
+
+    encrypted_password = encrypt_password(new_password)
+    db.query(models.Users).filter(models.Users.user_id == user.get("id")).update(
+        {
+            "hashed_password": encrypted_password,
+        }
     )
+    db.commit()
+
+    msg = "Password changed successfully!"
+    return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
 
 
 @router.get("/delete/{user_id}", response_class=HTMLResponse)

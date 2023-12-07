@@ -6,7 +6,6 @@ from starlette import status
 from starlette.responses import RedirectResponse
 
 app = FastAPI()
-models.Base
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
