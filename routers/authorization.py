@@ -9,7 +9,7 @@ import models
 from typing import Annotated, Optional
 from starlette.responses import RedirectResponse
 
-## authentication
+## authorization
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/authorization", tags=["authorization"])
 
 SECRET_KEY = "ac9cfe2bb4a5036d00c472681c0ec91041a0a6eb88f817cb59d5e2a3071ff5cd"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 10
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="authorization/token")
@@ -66,9 +66,52 @@ class LoginForm:
         self.password = form.get("password")
 
 
-@router.get("/login", response_class=HTMLResponse)
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
+    response: Response, form_data: form_dependency, db: db_dependency
+):
+    user = authenticate_user(form_data.username, form_data.password, db)
+    if not user:
+        return False
+        # raise HTTPException(
+        #     status_code=status.HTTP_401_UNAUTHORIZED, detail="User validation failed."
+        # )
+    token = create_access_token(
+        user.username, user.user_id, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    response.set_cookie(key="access_token", value=token, httponly=True)
+    return True
+
+    # return True
+    # return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/", response_class=HTMLResponse)
 async def authentication_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
+
+@router.post("/", response_class=HTMLResponse)
+async def login(request: Request, db: Session = Depends(get_db)):
+    try:
+        form = LoginForm(request)
+        await form.create_oauth_form()
+        response = RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+
+        validate_user_cookie = await login_for_access_token(
+            response=response, form_data=form, db=db
+        )
+        if not validate_user_cookie:
+            msg = "Incorrect username or password"
+            return templates.TemplateResponse(
+                "login.html", {"request": request, "msg": msg}
+            )
+        return response
+    except HTTPException as e:
+        msg = "Unknown error"
+        return templates.TemplateResponse(
+            "login.html", {"request": request, "msg": msg}
+        )
 
 
 def hash_password(plain_password):
@@ -94,29 +137,12 @@ def create_access_token(username: str, user_id: int, validation_time: timedelta)
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-@router.post("/token", response_model=Token)
-async def login_for_access_token(
-    response: Response, form_data: form_dependency, db: db_dependency
-):
-    user = authenticate_user(form_data.username, form_data.password, db)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="User validation failed."
-        )
-    token = create_access_token(
-        user.username, user.user_id, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-    response.set_cookie(key="access_token", value=token, httponly=True)
-    # return True
-    return {"access_token": token, "token_type": "bearer"}
-
-
 async def get_current_user(
     # token: token_dependency,  ########### jesli usune token_dependency - strace klodke
     # jesli wiec to usuniemy, to stworzy sie ciasteczko i tak, wiec pewnie trzeba to wywalic i stworzyc osobna
     # funkcje logowania
     request: Request,
-    token: token_dependency,
+    # token: token_dependency,
 ):
     try:
         token = request.cookies.get("access_token")
@@ -135,19 +161,59 @@ async def get_current_user(
         raise HTTPException(status_code=404, detail="Not found")
 
 
-@router.post("/login", response_class=JSONResponse)
-async def login(response: Response, request: Request, db: db_dependency):
-    # try:
-    form = LoginForm(request)
-    await form.create_oauth_form()
-    response = RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
-    validate_user_cookie = await login_for_access_token(Response, form, db)
-
-    if not validate_user_cookie:
-        msg = "Incorrect Username of Password"
-        return templates.TemplateResponse(
-            "login.html", {"request": request, "msg": msg}
-        )
+@router.get("/logout", response_class=JSONResponse)
+async def logout(request: Request):
+    msg = "Logout successful"
+    response = templates.TemplateResponse(
+        "login.html", {"request": request, "msg": msg}
+    )
+    response.delete_cookie(key="access_token")
     return response
-    # except HTTPException:
-    #     print("dDDDDDDD")
+
+
+@router.get("/register", response_class=HTMLResponse)
+async def register(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+
+# @router.post("/register", response_class=HTMLResponse)
+# async def register(
+#     request: Request,
+#     email: str = Form(...),
+#     username: str = Form(...),
+#     password: str = Form(...),
+# ):
+#     msg = "Register successful"
+#     response = templates.TemplateResponse("home.html", {"request": request, "msg": msg})
+#     response.set_cookie(key="access_token", value=token, httponly=True)
+#     return response
+
+
+@router.post("/register", response_class=JSONResponse)
+async def register_user(
+    request: Request,
+    email: str = Form(...),
+    username: str = Form(...),
+    password: str = Form(...),
+    password2: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    validation2 = db.query(models.Users).filter(models.Users.email == email).first()
+    validation1 = (
+        db.query(models.Users).filter(models.Users.username == username).first()
+    )
+    if validation1 is not None or validation2 is not None:
+        raise HTTPException(status_code=404, detail="juz istnieje")
+    if password != password2:
+        raise HTTPException(status_code=404, detail="zle haslo")
+
+    users_model = models.Users()
+    users_model.email = email
+    users_model.username = username
+    users_model.hashed_password = hash_password(password)
+    db.add(users_model)
+    db.commit()
+
+    msg = "User successfully created!"
+
+    return templates.TemplateResponse("login.html", {"request": request, "msg": msg})
