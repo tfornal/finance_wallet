@@ -1,12 +1,11 @@
 {% include 'layout.html' %}
 
 <div class="container">
-    <div class="card text_center">
-        <div class="card-header">
-            Your expenses
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">List of your expenses</h5>
+    <div class="card">
+        <div class="card-body" >
+                <h4 class="card-title d-flex justify-content-center ">
+                    <b> List of your expenses </b>
+                </h4>
             <table class="table table-responsive">
                 <thead>
                 <tr>
@@ -27,11 +26,11 @@
                         <td id="td1">{{expense.price}}</td>
                         <td id="td1">{{expense.date}}</td>
                         <td id="td1">{{expense.category}}</td>
-                        <td id="td1">TEST</td>
+                        <td id="td1">-</td>
                         <td>
                             <button onclick="window.location.href='edit_expense/{{expense.id}}'"
                             type="button" class="btn btn-info">Edit</button>
-                            <button type="button" class="btn btn-danger">Delete</button>
+
                         </td>
                     </tr>
                     {% endfor %}

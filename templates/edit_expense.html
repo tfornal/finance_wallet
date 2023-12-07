@@ -9,7 +9,9 @@
                 <div class="form-group">
                     <label for="data">Select date:</label>
                     <div class="input-group">
+                       
                         <input type="date" id="data" name="data" class="form-control" required>
+                        
                         <div class="input-group-append">
                             <span class="input-group-text">
                                 <i class="fas fa-calendar-alt"></i> <!-- Ikona kalendarza FontAwesome -->
@@ -19,15 +21,21 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ expense.title }}" required>
+                </div>
+                
+                <div class="form-group">
                     <label>Price</label>
-                    <input type="text" class="form-control" id="amount" name="price"
+                    <input type="text" class="form-control" id="amount" name="price" value="{{ expense.price }}"
                            required pattern="\d+(\.\d{1,2})?">
                 </div>
+                
                 <div class="form-group">
-                    <label>Description</label>
-                    <textarea class="form-control" rows="3" name="title"
-                              required></textarea>
+                    <label>Comments</label>
+                    <textarea class="form-control" rows="3" name="Comments"></textarea>
                 </div>
+                
                 <div class="form-group">
                     <label for="category">Category</label>
                     <div class="input-group">
@@ -50,8 +58,9 @@
                     <label>New Category</label>
                     <input type="text" class="form-control" id="newCategory" name="newCategory">
                 </div>
-
                 <button type="submit" class="btn btn-success">Edit expense</button>
+                
+                <button onclick="deleteExpense({{ expense.id }})" type="button" class="btn btn-danger">Delete</button>
             </form>
         </div>
     </div>
@@ -104,4 +113,9 @@
         var today = new Date().toISOString().split('T')[0];
         document.getElementById("data").value = today;
     });
+    function deleteExpense(expenseId) {
+        if (confirm("Are you sure you want to delete this expense?")) {
+            window.location.href = `/wallet/delete/${expenseId}`;
+        }
+    }
 </script>

@@ -55,12 +55,12 @@ async def get_all_by_user(
 
 
 @router.get("/add_expense", response_class=HTMLResponse)
-async def add_new_expense(request: Request):
+async def create_expense(request: Request):
     return templates.TemplateResponse("add_expense.html", {"request": request})
 
 
 @router.post("/add_expense", response_class=HTMLResponse)
-async def create_expense(
+async def create_expense_commit(
     request: Request,
     title: str = Form(...),
     price: str = Form(...),
@@ -84,30 +84,62 @@ async def create_expense(
 
 
 @router.get("/edit_expense/{expense_id}", response_class=HTMLResponse)
-async def edit_expense(request: Request):
-    return templates.TemplateResponse("edit_expense.html", {"request": request})
+async def edit_expense(
+    request: Request, expense_id: int, db: SessionLocal = Depends(get_db)
+):
+    expense = db.query(models.Wallet).filter(models.Wallet.id == expense_id).first()
+    if not expense:
+        raise HTTPException(status_code=404, detail="Expense not found")
+
+    return templates.TemplateResponse(
+        "edit_expense.html", {"request": request, "expense": expense}
+    )
 
 
 @router.post("/edit_expense/{expense_id}", response_class=HTMLResponse)
-async def create_expense(
+async def edit_expense_commit(
     request: Request,
     expense_id: int,
     title: str = Form(...),
     price: str = Form(...),
     category: str = Form(...),
-    # date: str = Form(...), #### TODO poprawic wpisywanie dat
+    # date: str = Form(...),  #### TODO poprawic wpisywanie dat
     db: Session = Depends(get_db),
 ):
     # breakpoint()
+    expense = db.query(models.Wallet).filter(models.Wallet.id == expense_id).first()
+    if not expense:
+        raise HTTPException(status_code=404, detail="Expense not found")
     db.query(models.Wallet).filter(models.Wallet.id == expense_id).update(
         {
             "title": title,
             "price": price,
             "category": category,
-            # "date": expense_model.date,
+            # "date": date,
             # Dodaj inne kolumny, które chcesz zaktualizować
         }
     )
+    db.commit()
+
+    return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+
+
+@router.get("/delete/{expense_id}")
+async def delete_expense(
+    request: Request,
+    expense_id: int,
+    db: SessionLocal = Depends(get_db),
+):
+    expense_model = (
+        db.query(models.Wallet)
+        .filter(models.Wallet.id == expense_id)
+        .filter(models.Wallet.owner_id == 13)
+        .first()
+    )
+    if expense_model is None:
+        return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+
+    db.query(models.Wallet).filter(models.Wallet.id == expense_id).delete()
     db.commit()
 
     return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
