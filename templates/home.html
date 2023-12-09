@@ -5,41 +5,63 @@
         color: white; /* Biały kolor tekstu na podświetlonym tle */
     }
 </style>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.7/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.7/js/jquery.dataTables.js"></script>
+
+<!-- {{ plot | safe }} -->
+
+<h1>Interactive Chart</h1>
+<div id="chart-container">
+    <!-- Tutaj umieść kod Plotly, możesz go ukryć na początku -->
+    {{ plot | safe }}
+</div>
+
+<button onclick="toggleChart()">Otwórz/Zamknij Wykres</button>
+
+<script>
+    function toggleChart() {
+        var chartContainer = document.getElementById('chart-container');
+        // Zamień widoczność wykresu (ukryj/pokaż)
+        chartContainer.style.display = chartContainer.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+
 <div class="container">
     <div class="card">
         <div class="card-body" >
                 <h4 class="card-title d-flex justify-content-center ">
                     <b> List of your expenses </b>
                 </h4>
-            <table class="table table-hover table-responsive">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Title</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Comments</th>
-                    <th scope="col">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {% for expense in expenses %}
-                    <tr class="pointer">
-                        <td>{{loop.index}}</td>
-                        <td id="td1">{{expense.title}}</td>
-                        <td id="td1">{{expense.price}}</td>
-                        <td id="td1">{{expense.date}}</td>
-                        <td id="td1">{{expense.category}}</td>
-                        <td id="td1">-</td>
-                        <td>
-                            <button onclick="window.location.href='edit_expense/{{expense.id}}'"
-                            type="button" class="btn btn-info">Edit</button>
+                <table class="table table-hover table-responsive">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Comments</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr class="pointer">
+                            <td>{{loop.index}}</td>
+                            <td id="td1">{{expense.title}}</td>
+                            <td id="td1">{{expense.price}}</td>
+                            <td id="td1">{{expense.date}}</td>
+                            <td id="td1">{{expense.category}}</td>
+                            <td id="td1">-</td>
+                            <td>
+                                <button onclick="window.location.href='edit_expense/{{expense.id}}'"
+                                type="button" class="btn btn-info">Edit</button>
 
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 
             </table>
             <div class="d-flex justify-content-center">
@@ -50,3 +72,19 @@
         </div>
     </div>
 </div>
+
+
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables with sorting options
+        $('.table').DataTable({
+            // Add sorting options for specific columns (replace 1 and 2 with column indices)
+            columnDefs: [
+                { targets: [1, 2], orderable: true },
+            ],
+            // Enable sorting by the first column by default
+            order: [[0, 'asc']]
+        });
+    });
+</script>

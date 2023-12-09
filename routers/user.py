@@ -87,52 +87,16 @@ async def create_user(
 
 
 @router.get("/change_password", response_class=HTMLResponse)
-async def change_password(request: Request):
+async def change_password(request: Request, db: SessionLocal = Depends(get_db)):
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
-    return templates.TemplateResponse("change_password.html", {"request": request})
-
-
-# @router.post("/change_password", response_class=HTMLResponse)
-# async def change_password_commit(
-#     request: Request,
-#     email: str = Form(...),
-#     password: str = Form(...),
-#     new_password: str = Form(...),
-#     repeat_new_password: str = Form(...),
-#     db: Session = Depends(get_db),
-# ):
-#     user = await get_current_user(request)
-#     if user is None:
-#         return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-
-#     user_model = (
-#         db.query(models.Users).filter(models.Users.user_id == user.get("id")).first()
-#     )
-
-#     if user_model is None:
-#         return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
-
-#     validation = validate_password(password, user_model.hashed_password)
-
-#     if not validation:
-#         return RedirectResponse(
-#             url="/user/change_password", status_code=status.HTTP_302_FOUND
-#         )
-
-#     if new_password != repeat_new_password:
-#         msg = "Password incorrect!"
-
-#         return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-#     encrypted_password = encrypt_password(new_password)
-#     user_model.hashed_password = encrypted_password
-#     db.commit()
-#     msg = "Password changed successfully!"
-
-#     return templates.TemplateResponse(
-#         "change_password.html", {"request": request, "msg": msg}
-#     )
+    user_model = (
+        db.query(models.Users).filter(models.Users.user_id == user.get("id")).first()
+    )
+    return templates.TemplateResponse(
+        "change_password.html", {"request": request, "email": user_model.email}
+    )
 
 
 @router.post("/change_password", response_class=HTMLResponse)
@@ -151,23 +115,20 @@ async def change_password_commit(
     user_model = (
         db.query(models.Users).filter(models.Users.user_id == user.get("id")).first()
     )
-    ### TODO - warunek sprawdzanie czy user/email istnieje
-    if user_model is None:
-        return HTTPException(status_code=404, detail="User not found")
 
-    # Validate the old password
     if not validate_password(password, user_model.hashed_password):
         msg = "Current password is incorrect!"
-        print(msg)
         return templates.TemplateResponse(
-            "change_password.html", {"request": request, "msg": msg}
+            "change_password.html",
+            {"request": request, "email": user_model.email, "msg": msg},
         )
 
     ### TODO checking password but already encrypted
-    if encrypt_password(new_password) != encrypt_password(repeat_new_password):
+    if new_password != repeat_new_password:
         msg = "New passwords do not match!"
         return templates.TemplateResponse(
-            "change_password.html", {"request": request, "msg": msg}
+            "change_password.html",
+            {"request": request, "email": user_model.email, "msg": msg},
         )
 
     encrypted_password = encrypt_password(new_password)
@@ -179,7 +140,10 @@ async def change_password_commit(
     db.commit()
 
     msg = "Password changed successfully!"
-    return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    return templates.TemplateResponse(
+        "change_password.html",
+        {"request": request, "email": user_model.email, "msg": msg},
+    )
 
 
 @router.get("/delete/{user_id}", response_class=HTMLResponse)

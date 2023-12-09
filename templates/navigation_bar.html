@@ -25,7 +25,14 @@
                 </li>
                 {% endif %}
             </ul>
-        </div>
+
+            <ul class="navbar-nav ml-auto">
+                {% if user %}
+                <li class="nav-item m-1">
+                    <a type="button" class="btn btn-outline-light" href="/user/change_password">Change password</a>
+                </li>
+                {% endif %}
+            </ul>
             
         </div>
     </nav>

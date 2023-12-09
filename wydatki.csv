@@ -1,0 +1,167 @@
+id,title ,price ,category,date,owner_id
+1,Zakup samochodu,20400,car,2018-11-21,29
+2,Ubezpieczenie ,100,car,2018-12-01,29
+3,Przegląd ,100,car,2018-12-01,29
+4,Rejestracja pojazdu,256,car,2018-12-01,29
+5,Opony zimowe + felgi 17' + wyważenie i założenie,750,car,2018-12-01,29
+6,Ubezpieczenie ,2000,car,2018-12-01,29
+7,"Wymiana rozrządu, oleju, filtrów - powietrza i oleju, filtru kabinowego, plynu chlodniczego, uszczelki pokrywy górnej silnika",1410,car,2018-12-01,29
+8,Gaz STAG,2900,car,2018-12-01,29
+9,Wymiana oleju w skrzyni biegów,281,car,2019-01-01,29
+10,Wymiana środkowej części układu wydechowego,870,car,2019-01-01,29
+11,"Wymiana zacisku tylnego hamulca, olej Motul 5W30 1L",541,car,2019-01-01,29
+12,Radio Android (nastepnie zostało sprzedane),280,car,2019-02-01,29
+13,Klucze do demontażu radia,18,car,2019-02-01,29
+14,Fakra - SMA GPS przejsciowka,40,car,2019-02-01,29
+15,Gniazdo samochodowe,27,car,2019-02-01,29
+16,Wkład lusterka,25,car,2019-04-01,29
+17,Tarcze i klocki hamulcowe tył + diagnostyka,750,car,2019-04-01,29
+18,Obudowa lusterka (druga czesc Pawel G.),125,car,2019-04-01,29
+19,Wymiana oleju motul 5W30 + 1 l zapasowy,300,car,2019-06-01,29
+20,Wywazenie kół ,50,car,2019-07-01,29
+21,Zamek wlewu paliwa,450,car,2019-07-01,29
+22,Serwis gazu,100,car,2019-07-01,29
+23,skrzynia M32 - lozyska + mechanizm roznicowy,5326,car,2019-09-01,29
+24,"Plyn hamulcowy, klocki przod, sprezyny przod, tuleje wahaczy tyl, itp. (wykaz na fakturze)",2874,car,2019-09-01,29
+25,Zapasowy litr oleju motul 5W30,36,car,2019-09-01,29
+26,Ubezpieczenie OC + AC ,1900,car,2019-11-01,29
+27,Wymiana oleju i filtrów oleju i powietrza,450,car,2019-11-01,29
+28,Przegląd samochodu,162,car,2019-11-01,29
+29,Wymiana oleju w skrzyni biegów - wymiana co 40k km; nastepny przeglad 220k,339,car,2020-02-01,29
+30,Wymiana opon i przytwierdzenie oslonki termicznej,140,car,2020-02-01,29
+31,Wentylator dmuchawy ,550,car,2020-02-01,29
+32,"Cewka sprezarki klimatyzacji, odgrzybienie, nabicie, filtr kabinowy",737,car,2020-07-01,29
+33,Wycieraczki,70,car,2020-07-01,29
+34,Wymiana Oleju,291,car,2020-07-01,29
+35,Zawieszenie - ,310,car,2020-10-01,29
+36,Wymiana opon + wywazanie,120,car,2020-12-04,29
+37,"Wymiana opon, olejow, filtrów",655,car,2021-04-01,29
+38,Przegląd gazu,100,car,2021-04-01,29
+39,Oslonka spryskiwacza + lakier,130,car,2021-04-01,29
+40,"Uszczelka pokrywy gornej silnika, naprawa opony, swieca zaplonowa ngk",391,car,2021-06-01,29
+41,Polerowanie swiatel,150,car,2021-08-01,29
+42,"Wymiana rozrządu (kolejny przy 275 kkkm), oleju, filtrów - powietrza i oleju, filtru kabinowego, plynu chlodniczego, kół",1756,car,2021-11-03,29
+43,Ubezpieczenie,1750,car,2021-11-10,29
+44,Przegląd gazu,100,car,2022-01-01,29
+45,Wymiana oleju w skrzyni biegów - wymiana co 40k km; nastepny przeglad 262k,350,car,2022-02-01,29
+46,"Zawieszenie, Wymiana kół",600,car,2022-05-05,29
+47,"Cieknący olej z silnika, wymiana oleju (5W30 - 1L)",1500,car,2022-05-10,29
+48,Olej 5W30 - 1L,60,car,2022-07-15,29
+49,Płyn chlodniczy ,100,car,2022-09-20,29
+50,Zbiornik wyrównawczy płynu chłodniczego,325,car,2022-09-27,29
+51,Wymiana Oleju w silniku + filtr powierza,377,car,2022-10-03,29
+52,Naprawa Gazu,250,car,2022-10-03,29
+53,Przegląd gazu,200,car,2022-10-03,29
+54,Przegląd samochodu,160,car,2022-10-08,29
+55,Opony zimowe,1300,car,2022-10-08,29
+56,Ubezpieczenie samochodu,1844,car,2022-10-08,29
+57,Akumulator,380,car,2022-12-19,29
+58,Wymiana Oleju w silniku + filtr powierza,434,car,2023-04-13,29
+59,Stojak na koła,100,car,2023-04-15,29
+60,nowe opony letnie Bridgestone,1520,car,2023-04-27,29
+61,myjnia,150,car,2023-05-04,29
+62,gaz - diagnostyka,150,car,2023-05-11,29
+63,"Gaz - wymiana wtrysków, swiec, uszczleki pokrywy gornej",1100,car,2023-05-15,29
+64,Walnieta rura wydechowa ,221,car,2023-05-22,29
+65,Tylna klapa,230,car,2023-05-22,29
+66,Chlodzenie,422,car,2023-07-20,29
+67,Opona wylkanizacja,50,car,2023-08-03,29
+68,Kolektor dolotowy,1038,car,2023-08-30,29
+69,Wymiana oleju,434,car,2023-10-23,29
+70,Klocki tył + wymiana kół ,413,car,2023-11-09,29
+71,UBEZPIECZENIE INTERRISK OC/AC/ASSISTANCE,2002,car,2023-11-10,29
+72,Nakladka spryskiwacza,167,car,2023-12-01,29
+73,"Filtr powietrza, dmuchawa wentylatora + wymiana",926,car,2023-12-01,29
+74,Giant - sprzedaż,-3400,bike,2020-01-01,29
+75,Trek,9900,bike,2020-01-01,29
+76,Lampka tył,170,bike,2020-04-01,29
+77,Pompka,85,bike,2020-04-01,29
+78,Pedały,335,bike,2020-05-01,29
+79,Buty ,600,bike,2020-06-05,29
+80,Kask,500,bike,2020-06-05,29
+81,Bidony,44,bike,2020-06-05,29
+82,Bagaznik na dach samochodu,520,bike,2020-06-05,29
+83,Torebka podsiodlowa,20,bike,2020-06-05,29
+84,Licznik,500,bike,2020-06-05,29
+85,koszyki na bidon ,114,bike,2020-06-05,29
+86,Opona do trenazera,100,bike,2020-06-05,29
+87,Trenażer,510,bike,2020-06-05,29
+88,Bikefitting,800,bike,2020-06-05,29
+89,koszulka + bluza rowerowa,500,bike,2020-06-05,29
+90,Narzędziownik,145,bike,2020-06-05,29
+91,Kaseta + łańcuch,350,bike,2020-06-05,29
+92,Klucz dynamometryczny ,75,bike,2020-06-05,29
+93,Lampka knog - przód,314,bike,2020-07-01,29
+94,Mostek + czujnik kadencji,230,bike,2020-07-01,29
+95,Okulary Oakley Flight Radar,750,bike,2020-07-01,29
+96,Kurtka przeciwwiatrowa,170,bike,2020-10-01,29
+97,Potówka krótka,60,bike,2020-10-01,29
+98,Nogawki,70,bike,2020-10-01,29
+99,Ochraniacze na buty,150,bike,2020-10-01,29
+100,Potówka długa - decathlon,60,bike,2020-10-01,29
+101,Rękawiczki zimowe,60,bike,2020-10-01,29
+102,Rękawki,60,bike,2020-10-01,29
+103,SPRZEDAŻ - Trenazer + opona,-520,bike,2020-11-01,29
+104,Miernik wyciagniecia lancucha,25,bike,2021-04-01,29
+105,"Oleje do lancucha, 2 detki",100,bike,2021-04-01,29
+106,Spodenki,315,bike,2021-05-01,29
+107,Direto XR,3300,bike,2021-06-01,29
+108,Bagażnik na dach,350,bike,2021-06-01,29
+109,Koła FALCON,4130,bike,2021-08-10,29
+110,Pancerze przerzutek,120,bike,2021-08-10,29
+111,GRAVEL kellys soot 30,3000,bike,2021-09-01,29
+112,Kurtka zimowa,500,bike,2022-01-01,29
+113,Zestaw narzedzi topeak,160,bike,2022-02-01,29
+114,Garmin Edge 530,1320,bike,2022-03-01,29
+115,Pomiar mocy RONDE,1350,bike,2022-03-01,29
+116,Serwis,70,bike,2022-03-01,29
+117,Klamkomanetka,700,bike,2022-03-01,29
+118,Spodenki,340,bike,2022-03-01,29
+119,Opony + klucz do suportu/tarcz,210,bike,2022-03-01,29
+120,Klucz do nakretki suportu,20,bike,2022-03-01,29
+121,Okulary Rockbros,95,bike,2022-03-01,29
+122,Spodenki rowerowe,249,bike,2022-05-01,29
+123,"bidony, torebka podsiodlowa",220,bike,2022-05-01,29
+124,Hamulec przedni,1200,bike,2022-08-01,29
+125,"koszulka, potowka, skarpetki",530,bike,2022-08-01,29
+126,Buty MTB Northwave,650,bike,2022-11-01,29
+127,Loca Gravel,16738,bike,2023-03-01,29
+128,Siodelko specialized romin evo comp,450,bike,2023-03-01,29
+129,Pas do pulsometru Garmin,290,bike,2023-03-01,29
+130,Kaseta + 2x lancuch - do TREKa,585,bike,2023-04-01,29
+131,Łancuch HG-701 do LOCA,150,bike,2023-04-01,29
+132,"Doplata do LOCA -> opony TLR, korba +220 zl, tarcze +200 zł + raty 200 zł+oklejenie_ramy+150 ",970,bike,2023-04-01,29
+133,Naprawa kola w Kellysie,124,bike,2023-05-01,29
+134,Opony Continental do TREKa,460,bike,2023-05-01,29
+135,Pedaly shimano XT - do LOCA,95,bike,2023-05-01,29
+136,Giant Defy Advanced Pro 1,14200,bike,2023-06-01,29
+137,Łańcuch sram force,130,bike,2023-06-01,29
+138,Wosk do lancucha,60,bike,2023-06-01,29
+139,Pojemnik na narzedzia i czujniki kadencji/predkosci,50,bike,2023-06-01,29
+140,Bloki look keo,50,bike,2023-06-01,29
+141,Lampka - Giant,112,bike,2023-06-01,29
+142,Skarpetki/plastikowa czesc do klamkomanetki,50,bike,2023-06-01,29
+143,Sprzedaż - koła Falcon,-3000,bike,2023-06-01,29
+144,SPRZEDAZ - Bryton,-220,bike,2023-06-01,29
+145,SPRZEDAZ Kierownica Giant SLR 440,-200,bike,2023-07-01,29
+146,SPRZEDAZ Opony Continental,-227,bike,2023-07-01,29
+147,SPRZEDAŻ - Łańcuch ultegra,-85,bike,2023-06-01,29
+148,SPRZEDAŻ - Klamkomanetka + zacisk ST-R8020/BR-R8070,-340,bike,2023-06-01,29
+149,SPRZEDAŻ - Spodenki endura,-130,bike,2023-06-01,29
+150,SPRZEDAŻ - Duotrap,-80,bike,2023-06-01,29
+151,Koła Bontrager,-500,bike,2023-07-01,29
+152,Opony druciane ,-90,bike,2023-07-01,29
+153,Pomiar Mocy - RONDE,-1000,bike,2023-07-01,29
+154,Grupa ULTEGRA,-1850,bike,2023-07-01,29
+155,Mostek bontrager 110 mm,-40,bike,2023-07-01,29
+156,Klamkomanetka lewa ST-R8020,-200,bike,2023-07-01,29
+157,SPRZEDAŻ - Rower Kellys,-2900,bike,2023-07-01,29
+158,Ciuchy Eroe,920,bike,2023-07-01,29
+159,Garmin Varia UT 800,585,bike,2023-08-01,29
+160,Bluza + skarpetki Eroe,475,bike,2023-08-01,29
+161,Sakwa na ramę - jack pack,145,bike,2023-08-01,29
+162,Koszyk na bidon ,25,bike,2023-08-01,29
+163,Wkład wentyli presta,53,bike,2023-08-01,29
+164,Pompka,70,bike,2023-08-01,29
+165,"Środek do czyszczenia lancucha, smar, szczypce do spinek lancucha",100,bike,2023-09-01,29
+166,Spodenki czapka bandana eroe,850,bike,2023-10-01,29

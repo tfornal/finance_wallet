@@ -10,30 +10,31 @@
     <div class="card-body">
         {% if msg %}
         {% if msg == 'Logout successful' or msg == 'User successfully created!'%}
-        <div class="alert alert-success" role="alert">
+        <div class="alert alert-success" role="alert" >
             {{msg}}
         </div>
         {% else %}
         <div class="alert alert-danger" role="alert">
-            {{msg}}
+        {{msg}}
         </div>
         {% endif %}
         {% endif %}
         <form method="POST" action="/authorization" style="max-width: 350px; margin: 0 auto;">
             <div class="form-group">
-                <label>Username</label>
                 <input type="text" class="form-control"
-                    name="email" required>
+                    name="email" required placeholder="Email address">
             </div>
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" class="form-control" name="password" required>
+                <input type="password" class="form-control" name="password" placeholder="Password" required>
             </div>
-            <button type="submit" class="btn" style="margin-top: 10px; margin-left: 25%; width: 50%; background-color:rgb(49, 158, 15)">Login</button>
+            <button type="submit" class="btn" style="margin-top: 10px; margin-left: 25%; width: 50%; background-color:rgb(79, 88, 216)">Login</button>
+            <div class="form-group">
+                <div class="form-group">
+                    <a href="#">Forgot password?</a>
+                </div>
+            </div>
         </form>
-        or
-        <a href="/authorization/register">Create new user</a>
-
+        <button onclick="window.location.href='/authorization/register'" type="btn" class="btn btn-info" style="margin-top: 10px; margin-left: 25%; width: 50%; background-color:rgb(49, 158, 15)">Create new account</button>
     </div>
 </div>
 </div>

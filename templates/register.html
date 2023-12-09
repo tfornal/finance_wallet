@@ -19,20 +19,55 @@
                     <label>Username</label>
                     <input type="text" class="form-control" name="username" required>
                 </div>
+                Enter a combination of at least eight numbers letters and punctuation marks (e.g. $ or ^ ).
 
                 <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" class="form-control" name="password" required>
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="togglePassword">
+                                <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label>Repeat password</label>
                     <input type="password" class="form-control" name="password2" required>
                 </div>
-                
+                {% if msg %}
+                {% if msg == "Password do not match the required pattern!"%}
+                <div class="alert alert-danger" role="alert">
+                    {{msg}}
+                </div>
+                {% endif %}
+                {% endif %}
                 <button type="submit" class="btn" style="margin-top: 10px; margin-left: 25%; 
                 width: 50%; background-color:rgb(13, 177, 163)">Register user</button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    // Script for toggling password visibility
+    $(document).ready(function(){
+        $("#togglePassword").click(function(){
+            var passwordField = $("#password");
+            var passwordFieldType = passwordField.attr("type");
+            
+            // Toggle between password and text
+            if(passwordFieldType === "password") {
+                passwordField.attr("type", "text");
+                $("#togglePassword i").removeClass("fa-eye-slash");
+                $("#togglePassword i").addClass("fa-eye");
+            } else {
+                passwordField.attr("type", "password");
+                $("#togglePassword i").removeClass("fa-eye");
+                $("#togglePassword i").addClass("fa-eye-slash");
+            }
+        });
+    });
+</script>

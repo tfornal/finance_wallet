@@ -21,6 +21,11 @@ from typing import Annotated
 ### to bedzie ptorzebne gdy bede przechodzil na html
 from fastapi.templating import Jinja2Templates
 
+
+import pandas as pd
+import plotly.express as px
+
+
 router = APIRouter(
     prefix="/wallet", tags=["wallet"], responses={404: {"description": "Not found"}}
 )
@@ -39,6 +44,41 @@ token_dependency = Annotated[str, Depends(oauth2_bearer)]
 models.Base.metadata.create_all(bind=engine)
 
 templates = Jinja2Templates(directory="templates")
+
+
+@router.get("/")
+async def get_cummulated_cost_by_category(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=302)
+
+    expenses = (
+        db.query(models.Wallet)
+        .filter(models.Wallet.owner_id == user.get("id"))
+        .order_by(models.Wallet.price)
+        .all()
+    )
+    df = pd.DataFrame(
+        [
+            {"Date": expense.date, "Price": expense.price, "Category": expense.category}
+            for expense in expenses
+        ]
+    )
+    df.sort_values(by="Date", inplace=True)
+    df["Cumulative_Price"] = df.groupby("Category")["Price"].cumsum()
+    df["Date"] = pd.to_datetime(df["Date"])
+    fig = px.scatter(
+        df, x="Date", y="Cumulative_Price", color="Category", title="Expenses Over Time"
+    )
+    fig.update_traces(mode="lines+markers", line=dict(shape="spline"))
+
+    return templates.TemplateResponse(
+        "home.html",
+        {"request": request, "expenses": expenses, "user": user, "plot": fig.to_html()},
+    )
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -131,7 +171,7 @@ async def edit_expense_commit(
             "price": price,
             "category": category,
             # "date": date,
-            # Dodaj inne kolumny, które chcesz zaktualizować
+            # Dodac inne kolumny, które chce zaktualizować
         }
     )
     db.commit()
@@ -161,3 +201,67 @@ async def delete_expense(
     db.commit()
 
     return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+
+
+@router.get("/get_by_category/{category}")
+async def get_by_category(
+    request: Request,
+    category: str,
+    db: SessionLocal = Depends(get_db),
+):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+
+    expense_total = (
+        db.query(func.sum(models.Wallet.price))
+        .filter(models.Wallet.category == category)
+        .filter(models.Wallet.owner_id == user.get("id"))
+        .scalar()
+    )
+    return templates.TemplateResponse(
+        "edit_expense.html", {"request": request, "expense_total": expense_total}
+    )
+
+
+@router.get("/")
+async def get_cummulated_cost_by_category(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=302)
+
+    expenses = (
+        db.query(models.Wallet)
+        .filter(models.Wallet.owner_id == user.get("id"))
+        .order_by(models.Wallet.date)
+        .all()
+    )
+
+    # Create a DataFrame from the expenses
+    df = pd.DataFrame(
+        [
+            {"Date": expense.date, "Price": expense.price, "Category": expense.category}
+            for expense in expenses
+        ]
+    )
+
+    df.sort_values(by="Date", inplace=True)
+    df["Cumulative_Price"] = df.groupby("Category")["Price"].cumsum()
+    df["Date"] = pd.to_datetime(df["Date"])
+
+    # Create a Plotly line chart
+    fig = px.scatter(
+        df,
+        x="Date",
+        y="Cumulative_Price",
+        color="Category",
+        title="Expenses Over Time",
+    )
+    fig.update_traces(mode="lines+markers", line=dict(shape="spline"))
+    # Render the template with the HTML representation of the chart
+    return templates.TemplateResponse(
+        "home.html", {"request": request, "plot": fig.to_html()}
+    )

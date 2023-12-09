@@ -10,7 +10,7 @@ from database import SessionLocal
 import models
 from typing import Annotated, Optional
 from starlette.responses import RedirectResponse
-
+import re
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
@@ -57,12 +57,12 @@ class Token(BaseModel):
 class LoginForm:
     def __init__(self, request: Request):
         self.request: Request = request
-        self.username: Optional[str] = None
+        self.email: Optional[str] = None
         self.password: Optional[str] = None
 
     async def create_oauth_form(self):
         form = await self.request.form()
-        self.username = form.get("email")
+        self.email = form.get("email")
         self.password = form.get("password")
 
 
@@ -70,7 +70,7 @@ class LoginForm:
 async def login_for_access_token(
     response: Response, form_data: form_dependency, db: db_dependency
 ):
-    user = authenticate_user(form_data.username, form_data.password, db)
+    user = authenticate_user(form_data.email, form_data.password, db)
     if not user:
         return False
         # raise HTTPException(
@@ -119,8 +119,8 @@ def verify_password(plain_password, hashed_password):
     return bcrypt_context.verify(plain_password, hashed_password)
 
 
-def authenticate_user(username: str, password: str, db):
-    user = db.query(models.Users).filter(models.Users.username == username).first()
+def authenticate_user(email: str, password: str, db):
+    user = db.query(models.Users).filter(models.Users.email == email).first()
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -136,6 +136,11 @@ def create_access_token(username: str, user_id: int, validation_time: timedelta)
 
 def is_token_expired():
     pass
+
+
+def check_password_strength(password):
+    pattern = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$")
+    return bool(pattern.match(password))
 
 
 async def get_current_user(
@@ -187,11 +192,20 @@ async def register_user(
     validation1 = (
         db.query(models.Users).filter(models.Users.username == username).first()
     )
-    ##TODO PRZEKIEROWAC DO HTML
+    #### TODO PRZEKIEROWAC DO HTML a nie httpexception - inaczej wyskakuje
+    #### TODO albo response = RedirectResponse(url="/wallet", status_code=status.
+    #### HTTP_302_FOUND)?????
     if validation1 is not None or validation2 is not None:
         raise HTTPException(status_code=404, detail="juz istnieje")
     if password != password2:
         raise HTTPException(status_code=404, detail="zle haslo")
+    validate_password_strength = check_password_strength(password)
+    # TODO - activate once finished!
+    # if not validate_password_strength:
+    #     msg = "Password do not match the required pattern!"
+    #     return templates.TemplateResponse(
+    #         "register.html", {"request": request, "msg": msg}
+    #     )
 
     users_model = models.Users()
     users_model.email = email

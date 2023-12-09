@@ -1,0 +1,5 @@
+TODOs:
+1. Weryfikacja email uzytkownika
+2. Sprawdzanie hasla - czy ma przynajmniej 8 znakow zawierajedna mala litere, 
+jedna duza, cyfre, 1 znak specjalny;
+
