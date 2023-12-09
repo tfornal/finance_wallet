@@ -165,3 +165,42 @@ id,title ,price ,category,date,owner_id
 164,Pompka,70,bike,2023-08-01,29
 165,"Środek do czyszczenia lancucha, smar, szczypce do spinek lancucha",100,bike,2023-09-01,29
 166,Spodenki czapka bandana eroe,850,bike,2023-10-01,29
+167,Tomografia 3D,340,dentist,2020-01-09,29
+168,Higienizacja ,250,dentist,2020-04-01,29
+169,Wizyta ortodontyczna + uzupelnianie + pantomogram,380,dentist,2020-04-01,29
+170,Zdjęcie cefalometryczne,80,dentist,2020-04-01,29
+171,ortodontka - aparat + wizyta (rabat),2200,dentist,2020-05-01,29
+172,leczenie endo (2 wizyty),400,dentist,2020-06-01,29
+173,leczenie endo - sciagniecie opatrunku,100,dentist,2020-06-01,29
+174,"Zmiana ligatur, wizyta u denstysty",150,dentist,2020-07-01,29
+175,Dentysta - kontrola,150,dentist,2020-08-01,29
+176,Aparat dół,1500,dentist,2020-09-01,29
+177,Luzowanie więzadeł + przeglad,400,dentist,2020-11-01,29
+178,Kontrolna wizyta ortodontyczna,150,dentist,2020-12-04,29
+179,Kontrolna wizyta ortodontyczna,100,dentist,2021-01-01,29
+180,Kontrolna wizyta ortodontyczna,150,dentist,2021-02-01,29
+181,Usuwanie 6 i 8 + augumentacja ,1600,dentist,2021-03-19,29
+182,Antybiotyk + leki,100,dentist,2021-03-19,29
+183,Ortodonta - wizyta,100,dentist,2021-05-07,29
+184,Czyszczenie okolic mleczaka,50,dentist,2021-07-10,29
+185,"Tomografia 3D żuchwy, wizyta ortodontyczna",370,dentist,2021-09-24,29
+186,"Odbdowa dziasla, usuniecie mleczaka",500,dentist,2021-10-19,29
+187,Ortodonta - wizyta,200,dentist,2021-11-10,29
+188,Augmentacja kości,600,dentist,2021-12-10,29
+189,Lekarstwa,130,dentist,2021-12-10,29
+190,Ortodonta - wizyta,170,dentist,2021-12-10,29
+191,Ortodonta - wizyta,170,dentist,2022-02-04,29
+192,Ekstrakcja ósemki,300,dentist,2022-02-04,29
+193,Tomografia żuchwy,170,dentist,2022-02-18,29
+194,Implant + tomografia żuchwy,2600,dentist,2022-03-11,29
+195,Antybiotyk + leki,90,dentist,2022-03-11,29
+196,Implanty x 2 ,4850,dentist,2022-04-22,29
+197,Antybiotyk + leki,98,dentist,2022-04-22,29
+198,Wizyta u ortodonty,150,dentist,2022-08-23,29
+199,Wizyta u dr adama - odsloniecie implantow,750,dentist,2022-08-26,29
+200,Korony,7200,dentist,2023-01-13,29
+201,Ortodonta + wycisk,200,dentist,2023-04-21,29
+202,Ortodonta - sciagniecie aparatu - dolnego,150,dentist,2023-05-26,29
+203,Ortodontka - kontrola,50,dentist,2023-06-23,29
+204,Ortodontka + nakladka,500,dentist,2023-07-14,29
+205,Nakładki,300,dentist,2023-07-24,29

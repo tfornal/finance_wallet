@@ -3,7 +3,7 @@ import sys
 sys.path.append("..")
 import models
 from database import engine, SessionLocal
-from fastapi import Depends, HTTPException, APIRouter, Request, Form, status
+from fastapi import Depends, HTTPException, APIRouter, Request, Form, status, Query
 from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy import func, Date
 from sqlalchemy.orm import Session
@@ -24,7 +24,11 @@ from fastapi.templating import Jinja2Templates
 
 import pandas as pd
 import plotly.express as px
-
+from fastapi import Depends, Request
+from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
+from starlette.responses import RedirectResponse
+import math
 
 router = APIRouter(
     prefix="/wallet", tags=["wallet"], responses={404: {"description": "Not found"}}
@@ -46,38 +50,97 @@ models.Base.metadata.create_all(bind=engine)
 templates = Jinja2Templates(directory="templates")
 
 
+def plot_pie_chart():
+    ...
+
+
 @router.get("/")
 async def get_cummulated_cost_by_category(
     request: Request,
+    page: int = Query(2, ge=1),  # Numer strony, domyślnie 1
+    items_per_page: int = Query(50, le=100),  # Ilość elementów na stronę, domyślnie 10
     db: Session = Depends(get_db),
 ):
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(url="/authorization", status_code=302)
 
-    expenses = (
+    # Pobierz wszystkie wydatki dla użytkownika
+    all_expenses = (
         db.query(models.Wallet)
         .filter(models.Wallet.owner_id == user.get("id"))
-        .order_by(models.Wallet.price)
+        .order_by(models.Wallet.date)
         .all()
     )
+
+    # Oblicz liczbę stron
+    total_pages = math.ceil(len(all_expenses) / items_per_page)
+    # Zastosuj paginację
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    expenses = all_expenses[start_index:end_index]
+
+    # Przetwórz dane i wygeneruj wykresy
     df = pd.DataFrame(
         [
-            {"Date": expense.date, "Price": expense.price, "Category": expense.category}
-            for expense in expenses
+            {
+                "Index": i + start_index,
+                "Date": expense.date,
+                "Price": expense.price,
+                "Category": expense.category,
+            }
+            for i, expense in enumerate(expenses)
         ]
     )
+    print(df)
     df.sort_values(by="Date", inplace=True)
     df["Cumulative_Price"] = df.groupby("Category")["Price"].cumsum()
     df["Date"] = pd.to_datetime(df["Date"])
+    total_cost_by_category = df.groupby("Category")["Price"].sum().reset_index()
+
+    pastel_palette = px.colors.qualitative.Pastel
+
     fig = px.scatter(
-        df, x="Date", y="Cumulative_Price", color="Category", title="Expenses Over Time"
+        df,
+        x="Date",
+        y="Cumulative_Price",
+        color="Category",
+        title="Expenses Over Time",
+        color_discrete_sequence=pastel_palette,
+    )
+    fig.update_layout(
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(showgrid=True, gridcolor="lightgrey"),
+        yaxis=dict(showgrid=True, gridcolor="lightgrey"),
+        showlegend=True,
+        legend=dict(bgcolor="rgba(255,255,255,0.7)"),
     )
     fig.update_traces(mode="lines+markers", line=dict(shape="spline"))
 
+    fig2 = px.pie(
+        total_cost_by_category,
+        values="Price",
+        names="Category",
+        title="Wykres Kołowy z Liniami Procentowymi",
+        hole=0.5,
+        labels={"Values": "Procenty"},
+        hover_data=["Category"],
+        color_discrete_sequence=pastel_palette,
+    )
+    fig2.update_traces(textposition="outside", textinfo="percent+label")
+
     return templates.TemplateResponse(
         "home.html",
-        {"request": request, "expenses": expenses, "user": user, "plot": fig.to_html()},
+        {
+            "request": request,
+            "expenses": expenses,
+            "user": user,
+            "plot_trend": fig.to_html(),
+            "plot_pie": fig2.to_html(),
+            "page": page,
+            "total_pages": total_pages,
+            "start_index": start_index,
+        },
     )
 
 
@@ -221,47 +284,4 @@ async def get_by_category(
     )
     return templates.TemplateResponse(
         "edit_expense.html", {"request": request, "expense_total": expense_total}
-    )
-
-
-@router.get("/")
-async def get_cummulated_cost_by_category(
-    request: Request,
-    db: Session = Depends(get_db),
-):
-    user = await get_current_user(request)
-    if user is None:
-        return RedirectResponse(url="/authorization", status_code=302)
-
-    expenses = (
-        db.query(models.Wallet)
-        .filter(models.Wallet.owner_id == user.get("id"))
-        .order_by(models.Wallet.date)
-        .all()
-    )
-
-    # Create a DataFrame from the expenses
-    df = pd.DataFrame(
-        [
-            {"Date": expense.date, "Price": expense.price, "Category": expense.category}
-            for expense in expenses
-        ]
-    )
-
-    df.sort_values(by="Date", inplace=True)
-    df["Cumulative_Price"] = df.groupby("Category")["Price"].cumsum()
-    df["Date"] = pd.to_datetime(df["Date"])
-
-    # Create a Plotly line chart
-    fig = px.scatter(
-        df,
-        x="Date",
-        y="Cumulative_Price",
-        color="Category",
-        title="Expenses Over Time",
-    )
-    fig.update_traces(mode="lines+markers", line=dict(shape="spline"))
-    # Render the template with the HTML representation of the chart
-    return templates.TemplateResponse(
-        "home.html", {"request": request, "plot": fig.to_html()}
     )
