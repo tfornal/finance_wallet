@@ -1,0 +1,42 @@
+{% include 'layout.html' %}
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <form method="POST"> <!-- tu jest bardzo wazne zeby program byl w stanie wywolac funkcje post -->
+
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Asset value (PLN)</label>
+                    <input type="text" class="form-control" id="asset_value_pln" name="asset_value_pln" "
+                           required pattern="\d+(\.\d{1,2})?">
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fa-solid fa-fingerprint"></i> <!-- Ikona kategorii (FontAwesome) -->
+                            </span>
+                        </div>
+                        <select id="category" name="category" class="custom-select" required>
+                            <option value="cash">cash</option>
+                            <option value="stock_market">stock market</option>
+                            <option value="crypto_market">crypto market</option>
+                            <option value="precious_metals">precious metals</option>
+
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">Add asset</button>
+                
+            </form>
+        </div>
+    </div>
+</div>
