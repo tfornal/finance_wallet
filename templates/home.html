@@ -39,7 +39,7 @@
                     <tbody  id="table-body">
                         {% for expense in expenses %}
                         <tr class="pointer">
-                            <td id="td1">{{expense.index}}</td>
+                            <td id="td1">{{loop.index}}</td>
                             <td id="td1">{{expense.title}}</td>
                             <td id="td1">{{expense.price}}</td>
                             <td id="td1">{{expense.date}}</td>
@@ -64,7 +64,6 @@
     </div>
 </div>
 
-
 <div class="d-flex justify-content-center">
     <nav aria-label="Page navigation">
         <ul class="pagination">
@@ -85,7 +84,7 @@
             </li>
         </ul>
     </nav>
-</div>
+</div> 
 
 <script>
     function toggleChart() {

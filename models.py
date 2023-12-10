@@ -22,6 +22,7 @@ class Users(Base):
     active = Column(Boolean, default=True)
 
     expenses = relationship("Wallet", back_populates="owner")
+    assets = relationship("Assets", back_populates="owner")
 
 
 class Wallet(Base):
@@ -35,3 +36,16 @@ class Wallet(Base):
     owner_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"))
 
     owner = relationship("Users", back_populates="expenses")
+
+
+class Assets(Base):
+    __tablename__ = "assets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    asset_value_pln = Column(Float)
+    percentage_share = Column(Float)
+    category = Column(String)
+    owner_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"))
+
+    owner = relationship("Users", back_populates="assets")

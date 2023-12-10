@@ -1,0 +1,6 @@
+id,title ,asset_value_pln,category,owner_id
+1,Cash,7500,cash,29
+2,Stock Market,13000,stock market,29
+3,Crypto Market,79000,crypto market,29
+4,Physical Gold (4 x ounce),24750,precious metals,29
+5,Physical Silver (100 x ounce),11500,precious metals,29

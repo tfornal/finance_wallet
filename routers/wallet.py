@@ -54,11 +54,57 @@ def plot_pie_chart():
     ...
 
 
+@router.get("/date")
+async def select_by_period(
+    request: Request, db: Session = Depends(get_db), start_date: str = Form(...)
+):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=302)
+
+    start_date = datetime.strptime("2018-11-21", "%Y-%m-%d").date()
+    end_date = datetime.strptime("2023-12-01", "%Y-%m-%d").date()
+
+    # Oblicz indeks początkowy dla zapytania
+
+    # Użyj metody filter, aby zastosować warunek pomiędzy datami
+    expense_by_date = (
+        db.query(models.Wallet)
+        .filter(models.Wallet.owner_id == user.get("id"))
+        .filter(models.Wallet.date.between(start_date, end_date))
+        .order_by(models.Wallet.date)
+        .all()
+    )
+
+    return expense_by_date
+
+
+# @router.get("/date/")
+# async def select_by_period(
+#     request: Request,
+#     db: Session = Depends(get_db),
+# ):
+#     user = await get_current_user(request)
+#     if user is None:
+#         return RedirectResponse(url="/authorization", status_code=302)
+
+#     start_date = datetime.strptime("2018-11-21", "%Y-%m-%d").date()
+#     end_date = datetime.strptime("2019-01-01", "%Y-%m-%d").date()
+
+#     expense_by_date = (
+#         db.query(models.Wallet)
+#         .filter(models.Wallet.owner_id == user.get("id"))
+#         .filter(models.Wallet.date.between(start_date, end_date))
+#         .all()
+#     )
+#     return expense_by_date
+
+
 @router.get("/")
 async def get_cummulated_cost_by_category(
     request: Request,
-    page: int = Query(2, ge=1),  # Numer strony, domyślnie 1
-    items_per_page: int = Query(50, le=100),  # Ilość elementów na stronę, domyślnie 10
+    page: int = Query(1, ge=1),  # Numer strony, domyślnie 1
+    items_per_page: int = Query(300, le=100),  # Ilość elementów na stronę, domyślnie 10
     db: Session = Depends(get_db),
 ):
     user = await get_current_user(request)
@@ -79,7 +125,6 @@ async def get_cummulated_cost_by_category(
     start_index = (page - 1) * items_per_page
     end_index = start_index + items_per_page
     expenses = all_expenses[start_index:end_index]
-
     # Przetwórz dane i wygeneruj wykresy
     df = pd.DataFrame(
         [
@@ -92,7 +137,6 @@ async def get_cummulated_cost_by_category(
             for i, expense in enumerate(expenses)
         ]
     )
-    print(df)
     df.sort_values(by="Date", inplace=True)
     df["Cumulative_Price"] = df.groupby("Category")["Price"].cumsum()
     df["Date"] = pd.to_datetime(df["Date"])
@@ -109,6 +153,7 @@ async def get_cummulated_cost_by_category(
         color_discrete_sequence=pastel_palette,
     )
     fig.update_layout(
+        updatemenus=[],
         plot_bgcolor="rgba(0,0,0,0)",
         xaxis=dict(showgrid=True, gridcolor="lightgrey"),
         yaxis=dict(showgrid=True, gridcolor="lightgrey"),
@@ -116,7 +161,6 @@ async def get_cummulated_cost_by_category(
         legend=dict(bgcolor="rgba(255,255,255,0.7)"),
     )
     fig.update_traces(mode="lines+markers", line=dict(shape="spline"))
-
     fig2 = px.pie(
         total_cost_by_category,
         values="Price",
@@ -127,6 +171,7 @@ async def get_cummulated_cost_by_category(
         hover_data=["Category"],
         color_discrete_sequence=pastel_palette,
     )
+    fig2.update_layout(updatemenus=[])
     fig2.update_traces(textposition="outside", textinfo="percent+label")
 
     return templates.TemplateResponse(

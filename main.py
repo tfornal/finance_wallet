@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import models
-from routers import wallet, user, authorization
+from routers import wallet, user, authorization, assets
 from starlette.staticfiles import StaticFiles
 from starlette import status
 from starlette.responses import RedirectResponse
@@ -15,6 +15,7 @@ async def root():
     return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
 
 
-app.include_router(wallet.router)
 app.include_router(user.router)
+app.include_router(wallet.router)
+app.include_router(assets.router)
 app.include_router(authorization.router)
