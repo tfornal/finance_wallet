@@ -2,7 +2,7 @@
 
 <div class="container">
     <div class="card">
-        <div class="card-header">Add expense to your wallet</div>
+        <div class="card-header">Edit expense</div>
 
         <div class="card-body">
             <form method="POST"> <!-- tu jest bardzo wazne zeby program byl w stanie wywolac funkcje post -->
@@ -59,8 +59,9 @@
                     <input type="text" class="form-control" id="newCategory" name="newCategory">
                 </div>
                 <button type="submit" class="btn btn-success">Edit expense</button>
-                
                 <button onclick="deleteExpense({{ expense.id }})" type="button" class="btn btn-danger">Delete</button>
+                <!-- <button window.location.href = `/wallet' type="button" class="btn btn-warning">Delete</button> -->
+                <a href="/wallet" class="btn btn-warning">Cancel</a>
             </form>
         </div>
     </div>

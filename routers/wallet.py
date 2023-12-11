@@ -4,6 +4,7 @@ sys.path.append("..")
 import models
 from database import engine, SessionLocal
 from fastapi import Depends, HTTPException, APIRouter, Request, Form, status, Query
+from typing import List
 from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy import func, Date
 from sqlalchemy.orm import Session
@@ -79,71 +80,26 @@ async def select_by_period(
     return expense_by_date
 
 
-# @router.get("/date/")
-# async def select_by_period(
-#     request: Request,
-#     db: Session = Depends(get_db),
-# ):
-#     user = await get_current_user(request)
-#     if user is None:
-#         return RedirectResponse(url="/authorization", status_code=302)
-
-#     start_date = datetime.strptime("2018-11-21", "%Y-%m-%d").date()
-#     end_date = datetime.strptime("2019-01-01", "%Y-%m-%d").date()
-
-#     expense_by_date = (
-#         db.query(models.Wallet)
-#         .filter(models.Wallet.owner_id == user.get("id"))
-#         .filter(models.Wallet.date.between(start_date, end_date))
-#         .all()
-#     )
-#     return expense_by_date
-
-
-@router.get("/")
-async def get_cummulated_cost_by_category(
-    request: Request,
-    page: int = Query(1, ge=1),  # Numer strony, domyślnie 1
-    items_per_page: int = Query(300, le=100),  # Ilość elementów na stronę, domyślnie 10
-    db: Session = Depends(get_db),
-):
-    user = await get_current_user(request)
-    if user is None:
-        return RedirectResponse(url="/authorization", status_code=302)
-
-    # Pobierz wszystkie wydatki dla użytkownika
-    all_expenses = (
+def get_expenses_for_user(
+    db: Session, user_id: int, order_by: str = "date"
+) -> List[models.Wallet]:
+    return (
         db.query(models.Wallet)
-        .filter(models.Wallet.owner_id == user.get("id"))
-        .order_by(models.Wallet.date)
+        .filter(models.Wallet.owner_id == user_id)
+        .order_by(order_by)
         .all()
     )
 
-    # Oblicz liczbę stron
-    total_pages = math.ceil(len(all_expenses) / items_per_page)
-    # Zastosuj paginację
-    start_index = (page - 1) * items_per_page
-    end_index = start_index + items_per_page
-    expenses = all_expenses[start_index:end_index]
-    # Przetwórz dane i wygeneruj wykresy
-    df = pd.DataFrame(
-        [
-            {
-                "Index": i + start_index,
-                "Date": expense.date,
-                "Price": expense.price,
-                "Category": expense.category,
-            }
-            for i, expense in enumerate(expenses)
-        ]
-    )
+
+def calculate_cumulative_prices(df: pd.DataFrame) -> pd.DataFrame:
     df.sort_values(by="Date", inplace=True)
     df["Cumulative_Price"] = df.groupby("Category")["Price"].cumsum()
     df["Date"] = pd.to_datetime(df["Date"])
-    total_cost_by_category = df.groupby("Category")["Price"].sum().reset_index()
+    return df
 
+
+def generate_scatter_plot(df: pd.DataFrame) -> px.scatter:
     pastel_palette = px.colors.qualitative.Pastel
-
     fig = px.scatter(
         df,
         x="Date",
@@ -161,7 +117,13 @@ async def get_cummulated_cost_by_category(
         legend=dict(bgcolor="rgba(255,255,255,0.7)"),
     )
     fig.update_traces(mode="lines+markers", line=dict(shape="spline"))
-    fig2 = px.pie(
+    return fig
+
+
+def generate_pie_chart(df: pd.DataFrame) -> px.pie:
+    pastel_palette = px.colors.qualitative.Pastel
+    total_cost_by_category = df.groupby("Category")["Price"].sum().reset_index()
+    fig = px.pie(
         total_cost_by_category,
         values="Price",
         names="Category",
@@ -171,8 +133,56 @@ async def get_cummulated_cost_by_category(
         hover_data=["Category"],
         color_discrete_sequence=pastel_palette,
     )
-    fig2.update_layout(updatemenus=[])
-    fig2.update_traces(textposition="outside", textinfo="percent+label")
+    fig.update_layout(updatemenus=[])
+    fig.update_traces(textposition="outside", textinfo="percent+label")
+    return fig
+
+
+@router.get("/")
+async def get_expenses_by_user(
+    request: Request,
+    page: int = Query(1, ge=1),
+    items_per_page: int = Query(300, le=100),
+    db: Session = Depends(get_db),
+):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=302)
+
+    all_expenses = get_expenses_for_user(db, user.get("id"))
+
+    total_pages = math.ceil(len(all_expenses) / items_per_page)
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    expenses = all_expenses[start_index:end_index]
+
+    df = pd.DataFrame(
+        [
+            {
+                "Index": i + start_index,
+                "Date": expense.date,
+                "Price": expense.price,
+                "Category": expense.category,
+            }
+            for i, expense in enumerate(expenses)
+        ]
+    )
+    if df.empty:
+        return templates.TemplateResponse(
+            "home.html",
+            {
+                "request": request,
+                "expenses": expenses,
+                "user": user,
+                "page": page,
+                "total_pages": total_pages,
+                "start_index": start_index,
+            },
+        )
+    df = calculate_cumulative_prices(df)
+
+    scatter_plot = generate_scatter_plot(df)
+    pie_chart = generate_pie_chart(df)
 
     return templates.TemplateResponse(
         "home.html",
@@ -180,28 +190,12 @@ async def get_cummulated_cost_by_category(
             "request": request,
             "expenses": expenses,
             "user": user,
-            "plot_trend": fig.to_html(),
-            "plot_pie": fig2.to_html(),
+            "plot_trend": scatter_plot.to_html(),
+            "plot_pie": pie_chart.to_html(),
             "page": page,
             "total_pages": total_pages,
             "start_index": start_index,
         },
-    )
-
-
-@router.get("/", response_class=HTMLResponse)
-async def get_all_by_user(
-    request: Request,
-    db: Session = Depends(get_db),
-):
-    user = await get_current_user(request)
-    if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
-    expenses = (
-        db.query(models.Wallet).filter(models.Wallet.owner_id == user.get("id")).all()
-    )
-    return templates.TemplateResponse(
-        "home.html", {"request": request, "expenses": expenses, "user": user}
     )
 
 

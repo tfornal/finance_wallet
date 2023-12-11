@@ -36,5 +36,5 @@ show tables;
 
 LOAD DATA LOCAL INFILE '/home/tomasz/Programowanie/finance_wallet/wydatki.csv' INTO TABLE finance_wallet.wallet FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS; show warnings;
 
-select * from assets;
-commit;
+
+alter table assets add column percentage_share float after asset_value_pln;

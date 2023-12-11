@@ -12,10 +12,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url="/assets", status_code=status.HTTP_302_FOUND)
 
 
 app.include_router(user.router)
 app.include_router(wallet.router)
 app.include_router(assets.router)
 app.include_router(authorization.router)
+
+
+# TODO jak jest 0 rekordow w /wallet; to wywala blad;

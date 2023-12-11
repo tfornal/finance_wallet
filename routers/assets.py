@@ -56,6 +56,8 @@ templates = Jinja2Templates(directory="templates")
 
 
 def calculate_percentage_share(user_id: int, db: Session):
+    # if not db.query(models.Assets).filter(models.Assets.owner_id == user_id).first():
+    #     return  # Jeśli nie ma rekordów, zakończ funkcję
     assets = db.query(models.Assets).filter(models.Assets.owner_id == user_id).all()
 
     total_asset_value = sum(asset.asset_value_pln for asset in assets)
@@ -99,7 +101,7 @@ def create_pie_chart(df, total_asset_value):
         df,
         values="Asset_value",
         names="Category",
-        hole=0.7,
+        hole=0.6,
         labels={"Values": "Procenty"},
         hover_data=["Title"],
         color_discrete_sequence=color_palette,
@@ -115,7 +117,10 @@ def create_pie_chart(df, total_asset_value):
             )
         ]
     )
-    fig.update_layout(updatemenus=[])
+    fig.update_traces(
+        textinfo="percent",
+        insidetextfont=dict(size=14),
+    )
     return fig
 
 
@@ -128,10 +133,12 @@ async def get_all_assets(request: Request, db: Session = Depends(get_db)):
     calculate_percentage_share(user.get("id"), db)
 
     all_assets = (
-        db.query(models.Assets).filter(models.Assets.owner_id == user.get("id")).all()
+        db.query(models.Assets)
+        .filter(models.Assets.owner_id == user.get("id"))
+        .order_by(models.Assets.asset_value_pln.asc())
+        .all()
     )
     df = create_assets_dataframe(all_assets)
-
     total_asset_value = df["Asset_value"].sum()
     fig = create_pie_chart(df, total_asset_value)
 
@@ -170,7 +177,6 @@ async def edit_expense_commit(
     category: str = Form(...),
     db: Session = Depends(get_db),
 ):
-    # breakpoint()
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)

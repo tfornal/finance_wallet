@@ -2,10 +2,8 @@
 
 <div class="container">
     <div class="card">
-        
-
         <div class="card-body">
-            <form method="POST"> <!-- tu jest bardzo wazne zeby program byl w stanie wywolac funkcje post -->
+            <form method="POST">
 
                 <div class="form-group">
                     <label>Title</label>
@@ -23,7 +21,7 @@
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text">
-                                <i class="fa-solid fa-fingerprint"></i> <!-- Ikona kategorii (FontAwesome) -->
+                                <i class="fa-solid fa-fingerprint"></i>
                             </span>
                         </div>
                         <select id="category" name="category" class="custom-select" required>
@@ -44,48 +42,6 @@
     </div>
 </div>
 
-<!-- <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Hide the new category input initially
-        document.getElementById("newCategoryLabel").style.display = "none";
-        document.getElementById("newCategory").style.display = "none";
-
-        // Handle the change of selected category
-        document.getElementById("category").addEventListener("change", function() {
-            var newCategoryLabel = document.getElementById("newCategoryLabel");
-            var newCategoryInput = document.getElementById("newCategory");
-
-            // If "Other" is selected, show the new category input field
-            if (this.value === "other") {
-                newCategoryLabel.style.display = "block";
-                newCategoryInput.style.display = "block";
-            } else {
-                // Otherwise, hide the input field
-                newCategoryLabel.style.display = "none";
-                newCategoryInput.style.display = "none";
-            }
-        });
-
-        // Handle the form submission
-        document.getElementById("expenseForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-
-            // Get values from the form
-            var amount = document.getElementById("amount").value;
-            var category = document.getElementById("category").value;
-            var newCategory = document.getElementById("newCategory").value;
-
-            // If "Other" is selected, use the new category
-            if (category === "other") {
-                category = newCategory;
-            }
-
-            // Add your code here to handle the expense data, e.g., save it to a database
-            console.log("Added expense:", { amount, category });
-        });
-    });
-</script>
--->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var today = new Date().toISOString().split('T')[0];
