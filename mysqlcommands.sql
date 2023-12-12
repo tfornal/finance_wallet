@@ -38,3 +38,28 @@ LOAD DATA LOCAL INFILE '/home/tomasz/Programowanie/finance_wallet/wydatki.csv' I
 
 select * from assets;
 commit;
+
+
+drop table if exists investments; 
+
+CREATE TABLE investments (
+    id INT NOT NULL AUTO_INCREMENT,
+    asset VARCHAR(255) NOT NULL,
+    current_price FLOAT(20,10) NOT NULL,
+    holdings FLOAT(20,10) not null,
+    invested FLOAT (20,2) NOT NULL,
+    current_value FLOAT (20,2) NOT NULL,
+    pnl FLOAT (10,2) NOT NULL,
+    owner_id INT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (owner_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+);
+show columns in investments;
+LOAD DATA LOCAL INFILE '/home/tomasz/Programowanie/finance_wallet/crypto.csv' INTO TABLE finance_wallet.investments FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS; show warnings;
+select * from investments;
+
+alter table investments modify column holdings FLOAT(20,10);
+commit;
+

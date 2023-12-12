@@ -56,19 +56,14 @@ templates = Jinja2Templates(directory="templates")
 
 
 def calculate_percentage_share(user_id: int, db: Session):
-    # if not db.query(models.Assets).filter(models.Assets.owner_id == user_id).first():
-    #     return  # Jeśli nie ma rekordów, zakończ funkcję
     assets = db.query(models.Assets).filter(models.Assets.owner_id == user_id).all()
-
     total_asset_value = sum(asset.asset_value_pln for asset in assets)
-
     for asset in assets:
         asset.percentage_share = (
             (asset.asset_value_pln / total_asset_value) * 100
             if total_asset_value
             else 0
         )
-
     db.commit()
 
 

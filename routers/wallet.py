@@ -169,7 +169,7 @@ async def get_expenses_by_user(
     )
     if df.empty:
         return templates.TemplateResponse(
-            "home.html",
+            "wallet.html",
             {
                 "request": request,
                 "expenses": expenses,
@@ -185,7 +185,7 @@ async def get_expenses_by_user(
     pie_chart = generate_pie_chart(df)
 
     return templates.TemplateResponse(
-        "home.html",
+        "wallet.html",
         {
             "request": request,
             "expenses": expenses,

@@ -93,7 +93,7 @@ async def login(request: Request, db: Session = Depends(get_db)):
     try:
         form = LoginForm(request)
         await form.create_oauth_form()
-        response = RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+        response = RedirectResponse(url="/assets", status_code=status.HTTP_302_FOUND)
 
         validate_user_cookie = await login_for_access_token(
             response=response, form_data=form, db=db
@@ -144,11 +144,7 @@ def check_password_strength(password):
 
 
 async def get_current_user(
-    # token: token_dependency,  ########### jesli usune token_dependency - strace klodke
-    # jesli wiec to usuniemy, to stworzy sie ciasteczko i tak, wiec pewnie trzeba to wywalic i stworzyc osobna
-    # funkcje logowania
     request: Request,
-    # token: token_dependency,
 ):
     try:
         token = request.cookies.get("access_token")

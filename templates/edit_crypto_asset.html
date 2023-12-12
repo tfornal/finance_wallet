@@ -1,0 +1,66 @@
+{% include 'layout.html' %}
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">Edit crypto asset</div>
+
+        <div class="card-body">
+            <form method="POST"> <!-- tu jest bardzo wazne zeby program byl w stanie wywolac funkcje post -->
+                <div class="form-group">
+                    <label for="data">Select date:</label>
+                    <div class="input-group">
+                       
+                        <input type="date" id="data" name="data" class="form-control" required>
+                        
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <i class="fas fa-calendar-alt"></i> <!-- Ikona kalendarza FontAwesome -->
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ crypto_asset.asset }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="text" class="form-control" id="amount" name="price" value="{{ crypto_asset.asset }}"
+                           required pattern="\d+(\.\d{1,2})?">
+                </div>
+                
+                <div class="form-group">
+                    <label>Comments</label>
+                    <textarea class="form-control" rows="3" name="Comments"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fa-solid fa-fingerprint"></i> <!-- Ikona kategorii (FontAwesome) -->
+                            </span>
+                        </div>
+                        <select id="category" name="category" class="custom-select" required>
+                            <option value="car">Car</option>
+                            <option value="house">House</option>
+                            <option value="bills">Bills</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- New Category Input -->
+                <div class="form-group">
+                    <label>New Category</label>
+                    <input type="text" class="form-control" id="newCategory" name="newCategory">
+                </div>
+                <button type="submit" class="btn btn-success">Edit</button>
+                <a href="/investments" class="btn btn-warning">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

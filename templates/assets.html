@@ -3,8 +3,10 @@
 <div class="container">
     <div class="card">
         <h4 class="card-title d-flex justify-content-center">
-            <b> Assets </b>
+            <a href="/wallet" class="btn btn-warning">Wallet</a>
+            <a href="/investments" class="btn btn-success">Investments</a>
         </h4>
+        
         <div id="chart-container">
             <div>
                 {{ plot_pie | safe }}

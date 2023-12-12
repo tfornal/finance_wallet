@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import models
-from routers import wallet, user, authorization, assets
+from routers import wallet, user, authorization, assets, investments
 from starlette.staticfiles import StaticFiles
 from starlette import status
 from starlette.responses import RedirectResponse
@@ -17,8 +17,6 @@ async def root():
 
 app.include_router(user.router)
 app.include_router(wallet.router)
+app.include_router(investments.router)
 app.include_router(assets.router)
 app.include_router(authorization.router)
-
-
-# TODO jak jest 0 rekordow w /wallet; to wywala blad;

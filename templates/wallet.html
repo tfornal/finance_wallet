@@ -16,7 +16,7 @@
 
 <button onclick="toggleChart()">Otwórz/Zamknij Wykres</button>
 
-
+<a href="/assets" class="btn btn-warning">Assets</a>
 
 <div class="container">
     <div class="card">
@@ -32,7 +32,6 @@
                             <th scope="col">Price</th>
                             <th scope="col">Date</th>
                             <th scope="col">Category</th>
-                            <th scope="col">Comments</th>
                             <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -44,7 +43,6 @@
                             <td id="td1">{{expense.price}}</td>
                             <td id="td1">{{expense.date}}</td>
                             <td id="td1">{{expense.category}}</td>
-                            <td id="td1">-</td>
                             <td>
                                 <button onclick="window.location.href='edit_expense/{{expense.id}}'"
                                 type="button" class="btn btn-info">Edit</button>

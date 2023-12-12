@@ -1,0 +1,91 @@
+{% include 'layout.html' %}
+
+    <div class="card">
+        <h4 class="card-title d-flex justify-content-center">
+            <a href="/wallet" class="btn btn-warning">Wallet</a>
+            <a href="/assets" class="btn btn-success">Assets</a>
+        </h4>
+        
+        <div id="chart-container">
+            <div>
+                {{ plot_pie | safe }}
+            </div>
+        </div>
+
+
+        <div class="container">
+            <div class="card">
+                <div class="card-body" >
+                        <h4 class="card-title d-flex justify-content-center ">
+                            <b> Crypto assets </b>
+                        </h4>
+                        <table class="table table-hover table-responsive">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Asset</th>
+                                    <th scope="col">Current price (USD)</th>
+                                    <th scope="col">Holdings</th>
+                                    <th scope="col">Invested (PLN)</th>
+                                    <th scope="col">Current value (PLN)</th>
+                                    <th scope="col">Profit/Loss (PLN)</th>
+                                    <th scope="col">Percentage Profit/Loss</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody  id="table-body">
+                                {% for crypto_asset in all_crypto_assets %}
+                                <tr class="pointer">
+                                    <td id="td1">{{loop.index}}</td>
+                                    <td id="td1">{{crypto_asset.asset}}</td>
+                                    {% if crypto_asset.asset == "pepe" %}
+                                    <td id="td1">{{crypto_asset.current_price|round(10)}}</td>
+                                    {% else %}
+                                    <td id="td1">{{crypto_asset.current_price|round(3)}}</td>
+                                    {% endif %}
+                                    <td id="td1">{{crypto_asset.holdings|round(3)}}</td>
+                                    <td id="td1">{{crypto_asset.invested}}</td>
+                                    <td id="td1">{{crypto_asset.current_value}}</td>
+                                    
+                                    {% set result = (crypto_asset.current_value - crypto_asset.invested)%}
+                                    <td id="td1" class="{% if result >= 0 %}positive{% else %}negative{% endif %}">
+                                        <b>
+                                            {{result|round(2)}}
+                                        </b>
+                                    </td>
+
+                                    {% set result = ((crypto_asset.current_value - crypto_asset.invested)/crypto_asset.invested ) * 100%}
+                                    <td id="td1" class="{% if result >= 0 %}positive{% else %}negative{% endif %}">
+                                        <b>
+                                            {{result|round(2)}} %
+                                        </b>
+                                    </td>
+                                    <td>
+                                        <button onclick="window.location.href='edit/{{crypto_asset.id}}'"
+                                        type="button" class="btn btn-info">Edit</button>
+        
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<style>
+/* Styl dla wartości dodatnich */
+.positive {
+    color: green;
+}
+
+/* Styl dla wartości ujemnych */
+.negative {
+    color: red;
+}
+</style>
