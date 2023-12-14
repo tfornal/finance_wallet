@@ -13,7 +13,7 @@ from fastapi import (
     Query,
 )
 from fastapi.responses import JSONResponse, HTMLResponse
-from sqlalchemy import func, Date, event
+from sqlalchemy import func, Date, event, select, update
 from sqlalchemy.orm import Session
 
 from starlette.responses import RedirectResponse
@@ -55,18 +55,6 @@ models.Base.metadata.create_all(bind=engine)
 templates = Jinja2Templates(directory="templates")
 
 
-def calculate_percentage_share(user_id: int, db: Session):
-    assets = db.query(models.Assets).filter(models.Assets.owner_id == user_id).all()
-    total_asset_value = sum(asset.asset_value_pln for asset in assets)
-    for asset in assets:
-        asset.percentage_share = (
-            (asset.asset_value_pln / total_asset_value) * 100
-            if total_asset_value
-            else 0
-        )
-    db.commit()
-
-
 def format_number(number):
     if number >= 1_000_000:
         return f"{number / 1_000_000:.1f}M"
@@ -88,6 +76,36 @@ def create_assets_dataframe(all_assets):
             for asset in all_assets
         ]
     )
+
+
+def calculate_percentage_share(user_id: int, db: Session):
+    assets = db.query(models.Assets).filter(models.Assets.owner_id == user_id).all()
+    total_asset_value = sum(asset.asset_value_pln for asset in assets)
+    for asset in assets:
+        asset.percentage_share = (
+            (asset.asset_value_pln / total_asset_value) * 100
+            if total_asset_value
+            else 0
+        )
+    db.commit()
+
+
+def update_total_crypto_value(user_id: int, db: Session):
+    crypto_assets = (
+        db.query(models.Investments)
+        .filter(models.Investments.owner_id == user_id)
+        .all()
+    )
+    total_crypto_value = sum(
+        crypto_asset.current_value for crypto_asset in crypto_assets
+    )
+    update_query = (
+        update(models.Assets)
+        .values(asset_value_pln=total_crypto_value)
+        .where(models.Assets.category == "crypto_market")
+    )
+    db.execute(update_query)
+    db.commit()
 
 
 def create_pie_chart(df, total_asset_value):
@@ -125,14 +143,15 @@ async def get_all_assets(request: Request, db: Session = Depends(get_db)):
     if user is None:
         return RedirectResponse(url="/authorization", status_code=302)
 
+    update_total_crypto_value(user.get("id"), db)
     calculate_percentage_share(user.get("id"), db)
-
     all_assets = (
         db.query(models.Assets)
         .filter(models.Assets.owner_id == user.get("id"))
-        .order_by(models.Assets.asset_value_pln.asc())
+        .order_by(models.Assets.asset_value_pln.desc())
         .all()
     )
+
     df = create_assets_dataframe(all_assets)
     total_asset_value = df["Asset_value"].sum()
     fig = create_pie_chart(df, total_asset_value)

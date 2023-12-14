@@ -15,27 +15,27 @@
                     <input type="text" class="form-control" id="asset_value_pln" name="asset_value_pln" value="{{ asset.asset_value_pln }}"
                            required pattern="\d+(\.\d{1,2})?">
                 </div>
+
                 
                 <div class="form-group">
                     <label for="category">Category</label>
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text">
-                                <i class="fa-solid fa-fingerprint"></i>
+                                <i class="fa-solid fa-fingerprint" ></i>
                             </span>
                         </div>
                         <select id="category" name="category" class="custom-select" required>
-                            <option value="cash">cash</option>
-                            <option value="stock_market">stock market</option>
-                            <option value="crypto_market">crypto market</option>
-                            <option value="precious_metals">precious metals</option>
-
-                            <option value="other">Other</option>
+                            <option value="cash" {% if asset.category == 'cash' %}selected{% endif %}>cash</option>
+                            <option value="stock_market" {% if asset.category == 'stock_market' %}selected{% endif %}>stock_market</option>
+                            <option value="crypto_market" {% if asset.category == 'crypto_market' %}selected{% endif %}>crypto_market</option>
+                            <option value="precious_metals" {% if asset.category == 'precious_metals' %}selected{% endif %}>precious_metals</option>
+                            <option value="other" {% if asset.category == 'other' %}selected{% endif %}>Other</option>
                         </select>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-success">Edit asset</button>
-                
+                <a href="/investments" class="btn btn-warning">Cancel</a>
                 <button onclick="deleteExpense({{ asset.id }})" type="button" class="btn btn-danger">Delete</button>
             </form>
         </div>

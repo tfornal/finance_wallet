@@ -57,8 +57,8 @@ class Investments(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     asset = Column(String)
-    current_price = Column(String)
-    holdings = Column(String)
+    current_price = Column(Float)
+    holdings = Column(Float)
     invested = Column(Float)
     current_value = Column(Float)
     pnl = Column(Float)

@@ -3,3 +3,5 @@ TODOs:
 2. Sprawdzanie hasla - czy ma przynajmniej 8 znakow zawierajedna mala litere, 
 jedna duza, cyfre, 1 znak specjalny;
 
+## przy edit total value of crypto dla tabeli asset nic sie nie  zmieni 
+bo ta wartosc z defaultu bedzie odczytywana z tabeli crypto; do poprawy

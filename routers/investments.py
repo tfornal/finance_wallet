@@ -71,7 +71,6 @@ def calculate_percentage_share(user_id: int, db: Session):
 def get_recent_prices(crypto_assets: list):
     cg = CoinGeckoAPI()
     price = cg.get_price(ids=crypto_assets, vs_currencies="usd")
-
     return price
 
 
@@ -82,23 +81,6 @@ def format_number(number):
         return f"{number / 1_000:.1f}k"
     else:
         return str(number)
-
-
-def update_df(df):
-    USD_PLN = 4.03
-    df["invested"] = pd.to_numeric(df["invested"], errors="coerce")
-    df["current_value"] = pd.to_numeric(df["current_value"], errors="coerce")
-    # Replace commas with periods and convert to float for "current_price"
-    df["current_price"] = df["current_price"].astype("str")
-    df["current_price"] = df["current_price"].str.replace(",", ".")
-    df["current_price"] = df["current_price"].astype("float64")
-
-    df["holdings"] = df["holdings"].astype("str")
-    df["holdings"] = df["holdings"].str.replace(",", ".")
-    df["holdings"] = df["holdings"].astype("float64")
-    # Calculate "current_value" based on "current_price" and "holdings"
-    df["current_value"] = df["current_price"] * df["holdings"] * USD_PLN
-    return df
 
 
 def create_assets_dataframe(all_investments):
@@ -118,8 +100,6 @@ def create_assets_dataframe(all_investments):
 
 
 def create_pie_chart(df):
-    # Ensure the "invested" and "current_value" columns are numeric
-
     invested_total_amount = df["invested"].sum()
     current_total_value = df["current_value"].sum()
 
@@ -165,25 +145,17 @@ def get_list_of_crypto_assets(user_id: int, db: Session):
 def update_current_price(user_id: int, db: Session):
     list_of_assets = get_list_of_crypto_assets(user_id, db)
     prices = get_recent_prices(list_of_assets)
-
     for asset, price in prices.items():
-        print(asset, price)
-        db.query(models.Investments).filter(models.Investments.asset == asset).update(
-            {
-                "current_price": price["usd"],
-            }
-        )
-    db.commit()
-
-
-def update_current_holdings_value(user_id: int, db: Session):
-    crypto_assets = (
-        db.query(models.Investments)
-        .filter(models.Investments.owner_id == user_id)
-        .all()
-    )
-    for coin in crypto_assets:
-        coin.current_value = coin.current_price * coin.holdings * 4.03
+        try:  ##########################TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            db.query(models.Investments).filter(
+                models.Investments.asset == asset
+            ).update(
+                {
+                    "current_price": price["usd"],
+                }
+            )
+        except:  ##########################TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            continue
     db.commit()
 
 
@@ -196,21 +168,36 @@ def update_price_list(df: pd.DataFrame, prices: dict):
     return df
 
 
+def get_cumulated_value(df):
+    value = df["current_value"].sum()
+    return value
+
+
+def get_cumulated_cost(df):
+    value = df["invested"].sum()
+    return value
+
+
 @router.get("/")
-async def get_all_investments(request: Request, db: Session = Depends(get_db)):
+async def get_all_crypto(request: Request, db: Session = Depends(get_db)):
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(url="/authorization", status_code=302)
 
     update_current_price(user.get("id"), db)
-    update_current_holdings_value(user.get("id"), db)
+    # update_current_holdings_value(user.get("id"), db)
 
     all_crypto_assets = (
         db.query(models.Investments)
         .filter(models.Investments.owner_id == user.get("id"))
+        .order_by(models.Investments.current_value.desc())
         .all()
     )
+
     df = create_assets_dataframe(all_crypto_assets)
+    current_value = get_cumulated_value(df)
+    invested = get_cumulated_cost(df)
+
     fig = create_pie_chart(df)
 
     return templates.TemplateResponse(
@@ -219,14 +206,58 @@ async def get_all_investments(request: Request, db: Session = Depends(get_db)):
             "request": request,
             "user": user,
             "all_crypto_assets": all_crypto_assets,
+            "current_value": current_value,
+            "invested": invested,
             "plot_pie": fig.to_html(),
         },
     )
 
 
+@router.get("/add", response_class=HTMLResponse)
+async def add_crypto_asset(request: Request, db: SessionLocal = Depends(get_db)):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+    return templates.TemplateResponse(
+        "add_crypto_asset.html",
+        {"request": request, "user": user},
+    )
+
+
+@router.post("/add", response_class=HTMLResponse)
+async def add_crypto_asset_commit(
+    request: Request,
+    # crypto_asset: str = Form(...),
+    current_price: float = Form(...),
+    holdings: float = Form(...),
+    invested: float = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+
+    asset_model = models.Investments()
+    asset_model.asset = "test"  # crypto_asset##########################TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    asset_model.current_price = current_price
+    asset_model.holdings = holdings
+    asset_model.invested = invested
+    asset_model.current_value = (
+        0.1  ##########################T ODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    )
+    asset_model.pnl = (
+        0.1  ##########################TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    )
+    asset_model.owner_id = user.get("id")
+    db.add(asset_model)
+    db.commit()
+
+    return RedirectResponse(url="/investments", status_code=status.HTTP_302_FOUND)
+
+
 @router.get("/edit/{crypto_asset_id}", response_class=HTMLResponse)
-async def edit_expense(
-    request: Request, expense_id: int, db: SessionLocal = Depends(get_db)
+async def edit_crypto_asset(
+    request: Request, crypto_asset_id: int, db: SessionLocal = Depends(get_db)
 ):
     user = await get_current_user(request)
     if user is None:
@@ -248,35 +279,60 @@ async def edit_expense(
 @router.post("/edit/{crypto_asset_id}", response_class=HTMLResponse)
 async def edit_crypto_asset_commit(
     request: Request,
-    crypto_asset_id: int,
-    crypto_asset: str = Form(...),
-    price: float = Form(...),
-    category: str = Form(...),
+    crypto_asset_id=int,
+    asset: str = Form(...),
+    current_price: float = Form(...),
+    holdings: float = Form(...),
+    invested: float = Form(...),
     db: Session = Depends(get_db),
 ):
-    # breakpoint()
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
-    expense = (
+    crypto_asset = (
         db.query(models.Investments)
         .filter(models.Investments.id == crypto_asset_id)
         .first()
     )
-    if not expense:
-        raise HTTPException(status_code=404, detail="Expense not found")
+    if not crypto_asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
     db.query(models.Investments).filter(
         models.Investments.id == crypto_asset_id
     ).update(
         {
-            "crypto_asset": crypto_asset,
+            "asset": asset,
+            "current_price": current_price,
             "holdings": holdings,
             "invested": invested,
-            # "date": date,
-            # Dodac inne kolumny, które chce zaktualizować
         }
     )
     db.commit()
 
+    return RedirectResponse(url="/investments", status_code=status.HTTP_302_FOUND)
 
-#     return RedirectResponse(url="/wallet", status_code=status.HTTP_302_FOUND)
+
+@router.get("/delete/{crypto_asset_id}")
+async def delete_asset(
+    request: Request,
+    crypto_asset_id: int,
+    db: SessionLocal = Depends(get_db),
+):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+    asset_model = (
+        db.query(models.Investments)
+        .filter(models.Investments.id == crypto_asset_id)
+        .filter(models.Investments.owner_id == user.get("id"))
+        .first()
+    )
+    if asset_model is None:
+        return RedirectResponse(url="/investments", status_code=status.HTTP_302_FOUND)
+
+    db.query(models.Investments).filter(
+        models.Investments.id == crypto_asset_id
+    ).delete()
+    db.commit()
+
+    return RedirectResponse(url="/investments", status_code=status.HTTP_302_FOUND)
