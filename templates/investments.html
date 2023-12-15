@@ -2,7 +2,7 @@
 
 <div class="card">
     <h4 class="card-title d-flex justify-content-center">
-        <a href="/wallet" class="btn btn-warning">Wallet</a>
+        <a href="/wallet" class="btn btn-primary">Wallet</a>
         <a href="/assets" class="btn btn-success">Assets</a>
     </h4>
 
@@ -11,11 +11,35 @@
             <div id="info-container">
                 <div class="info-item">
                     <span class="info-label">Current Value:</span>
-                    <span class="info-value">{{current_value}}</span>
+                    <span class="info-value text-success">
+                        <b>{{current_value | round(2)}} PLN</b>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">USD to PLN exchange rate:</span>
+                    <span class="info-value text-info">
+                        <b>{{usd_to_pln_exchange_rate | round(2)}} PLN</b>
+                    </span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Invested:</span>
-                    <span class="info-value">{{invested}}</span>
+                    <span class="info-value text-warning">
+                        <b>{{invested | round(2)}} PLN</b>
+                    </span>
+                </div>
+                <div class="info-item">
+                    {% set pnl = current_value - invested %}
+                    <span class="info-label">Total Profit/Loss:</span>
+                    <span class="{% if pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        <b>{{ pnl | round(2) }} PLN</b>
+                    </span>
+                </div>
+                <div class="info-item">
+                    {% set percentage_pnl = (current_value - invested) / invested * 100 %}
+                    <span class="info-label">Percentage Profit/Loss:</span>
+                    <span class="{% if percentage_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        <b>{{ percentage_pnl | round(2) }}%</b>
+                    </span>
                 </div>
             </div>
         </div>
@@ -27,7 +51,7 @@
             </div>
         </div>
     </div>
-
+    <button onclick="window.location.href='add'" type="button" class="btn btn-success">Add new asset</button>
     <div class="container mt-4">
         <h4 class="card-title d-flex justify-content-center">
             <b>Crypto Assets</b>
@@ -59,11 +83,11 @@
                             <td>{{ crypto_asset.current_value }}</td>
 
                             {% set result = crypto_asset.current_value - crypto_asset.invested %}
-                            <td class="{% if crypto_asset.pnl >= 0 %}positive{% else %}negative{% endif %}">
+                            <td class="{% if result >= 0 %}text-success{% else %}text-danger{% endif %}">
                                 <b>{{ result | round(2) }}</b>
                             </td>
 
-                            <td class="{% if result >= 0 %}positive{% else %}negative{% endif %}">
+                            <td class="{% if crypto_asset.pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
                                 <b>{{ crypto_asset.pnl | round(2) }}%</b>
                             </td>
 
@@ -78,21 +102,24 @@
             </div>
         </div>
     </div>
+
+    
 </div>
 
-<button onclick="window.location.href='add'" 
-type="button" class="btn btn-success">Add new asset</button>
 <style>
-    .positive {
-        color: green;
+    .text-success {
+        color: #28a745; /* Green */
     }
 
-    .negative {
-        color: red;
+    .text-danger {
+        color: #dc3545; /* Red */
     }
+
     #info-container {
         text-align: center;
         padding: 20px;
+        background-color: #f8f9fa; /* Light gray background */
+        border-radius: 10px;
     }
 
     .info-item {
@@ -106,6 +133,11 @@ type="button" class="btn btn-success">Add new asset</button>
 
     .info-value {
         font-size: 20px;
-        color: #28a745; /* Kolor zielony, można dostosować */
+    }
+
+    #chart-container {
+        background-color: #fff; /* White background for the chart */
+        padding: 20px;
+        border-radius: 10px;
     }
 </style>

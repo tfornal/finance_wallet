@@ -8,7 +8,7 @@ from typing import List
 from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy import func, Date, text
 from sqlalchemy.orm import Session
-
+import requests
 from starlette.responses import RedirectResponse
 from starlette import status
 
@@ -83,6 +83,19 @@ def format_number(number):
         return str(number)
 
 
+def get_usd_to_pln_exchange_rate():
+    url = "https://open.er-api.com/v6/latest/USD"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        exchange_rate = data["rates"]["PLN"]
+        return exchange_rate
+    else:
+        print(f"Failed to fetch exchange rate. Status code: {response.status_code}")
+        return None
+
+
 def create_assets_dataframe(all_investments):
     return pd.DataFrame(
         [
@@ -100,7 +113,6 @@ def create_assets_dataframe(all_investments):
 
 
 def create_pie_chart(df):
-    invested_total_amount = df["invested"].sum()
     current_total_value = df["current_value"].sum()
 
     color_palette = px.colors.qualitative.Pastel
@@ -138,7 +150,7 @@ def get_list_of_crypto_assets(user_id: int, db: Session):
         .distinct()
         .all()
     )
-    list_of_assets = [i[0] for i in list_of_assets]
+    list_of_assets = [asset_name[0] for asset_name in list_of_assets]
     return list_of_assets
 
 
@@ -199,7 +211,7 @@ async def get_all_crypto(request: Request, db: Session = Depends(get_db)):
     invested = get_cumulated_cost(df)
 
     fig = create_pie_chart(df)
-
+    usd_to_pln_exchange_rate = get_usd_to_pln_exchange_rate()
     return templates.TemplateResponse(
         "investments.html",
         {
@@ -208,6 +220,7 @@ async def get_all_crypto(request: Request, db: Session = Depends(get_db)):
             "all_crypto_assets": all_crypto_assets,
             "current_value": current_value,
             "invested": invested,
+            "usd_to_pln_exchange_rate": usd_to_pln_exchange_rate,
             "plot_pie": fig.to_html(),
         },
     )
@@ -227,7 +240,6 @@ async def add_crypto_asset(request: Request, db: SessionLocal = Depends(get_db))
 @router.post("/add", response_class=HTMLResponse)
 async def add_crypto_asset_commit(
     request: Request,
-    # crypto_asset: str = Form(...),
     current_price: float = Form(...),
     holdings: float = Form(...),
     invested: float = Form(...),

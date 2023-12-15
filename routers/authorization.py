@@ -72,10 +72,15 @@ async def login_for_access_token(
 ):
     user = authenticate_user(form_data.email, form_data.password, db)
     if not user:
-        return False
-        # raise HTTPException(
-        #     status_code=status.HTTP_401_UNAUTHORIZED, detail="User validation failed."
-        # )
+        # return False
+        # # raise HTTPException(
+        # #     status_code=status.HTTP_401_UNAUTHORIZED, detail="User validation failed."
+        # # )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     token = create_access_token(
         user.username, user.user_id, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
@@ -157,7 +162,9 @@ async def get_current_user(
             logout(request)
         return {"username": username, "id": user_id}
     except JWTError:
-        raise HTTPException(status_code=404, detail="Not found")
+        return
+        # raise HTTPException(status_code=404, detail="Not founddddddddddd")
+        # return RedirectResponse(url="/login", status_code=302)
 
 
 @router.get("/logout", response_class=JSONResponse)

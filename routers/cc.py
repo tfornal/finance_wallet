@@ -11,7 +11,7 @@ import requests
 #     response = requests.get(url, params=parameters)
 #     data = response.json()
 
-#     if coin in data and "usd" in data[coin]:
+#     if coin in data and "usd" in data[coin]:/
 #         crypto_price = data[coin]["usd"]
 #         return crypto_price
 #     else:

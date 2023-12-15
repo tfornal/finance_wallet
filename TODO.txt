@@ -5,3 +5,5 @@ jedna duza, cyfre, 1 znak specjalny;
 
 ## przy edit total value of crypto dla tabeli asset nic sie nie  zmieni 
 bo ta wartosc z defaultu bedzie odczytywana z tabeli crypto; do poprawy
+- wyszukiwarka w list of your exp[enses]
+- dodanie automatycznego odnowienia expiration date jesli jest aktywnosc, jesli nie, to po 10 minutach wylogowac???
