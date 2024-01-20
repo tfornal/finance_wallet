@@ -16,7 +16,7 @@ from datetime import datetime, date
 from typing import Optional
 
 # from pydantic import BaseModel, Field
-from .authorization import oauth2_bearer, get_current_user
+from .auth import oauth2_bearer, get_current_user
 from typing import Annotated
 
 ### to bedzie ptorzebne gdy bede przechodzil na html
@@ -84,8 +84,8 @@ def format_number(number):
 
 
 def get_usd_to_pln_exchange_rate():
-    url = "https://open.er-api.com/v6/latest/USD"
-    response = requests.get(url)
+    URL = "https://open.er-api.com/v6/latest/USD"
+    response = requests.get(URL)
 
     if response.status_code == 200:
         data = response.json()
@@ -194,7 +194,7 @@ def get_cumulated_cost(df):
 async def get_all_crypto(request: Request, db: Session = Depends(get_db)):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=302)
+        return RedirectResponse(url="/auth", status_code=302)
 
     update_current_price(user.get("id"), db)
     # update_current_holdings_value(user.get("id"), db)

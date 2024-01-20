@@ -23,7 +23,7 @@ from datetime import datetime, date
 from typing import Optional
 
 # from pydantic import BaseModel, Field
-from .authorization import oauth2_bearer, get_current_user
+from .auth import oauth2_bearer, get_current_user
 from typing import Annotated
 
 
@@ -141,7 +141,7 @@ def create_pie_chart(df, total_asset_value):
 async def get_all_assets(request: Request, db: Session = Depends(get_db)):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=302)
+        return RedirectResponse(url="/auth", status_code=302)
 
     update_total_crypto_value(user.get("id"), db)
     calculate_percentage_share(user.get("id"), db)
@@ -173,7 +173,7 @@ async def edit_asset(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     asset = db.query(models.Assets).filter(models.Assets.id == asset_id).first()
     if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
@@ -193,7 +193,7 @@ async def edit_expense_commit(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     expense = db.query(models.Assets).filter(models.Assets.id == asset_id).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
@@ -229,7 +229,7 @@ async def add_asset_commit(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
 
     asset_model = models.Assets()
     asset_model.title = title
@@ -251,7 +251,7 @@ async def delete_asset(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     asset_model = (
         db.query(models.Assets)
         .filter(models.Assets.id == asset_id)

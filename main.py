@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import models
-from routers import wallet, user, authorization, assets, investments
+from routers import wallet, user, auth, assets, investments, password_reset, send_email
 from starlette.staticfiles import StaticFiles
 from starlette import status
 from starlette.responses import RedirectResponse
@@ -19,4 +19,6 @@ app.include_router(user.router)
 app.include_router(wallet.router)
 app.include_router(investments.router)
 app.include_router(assets.router)
-app.include_router(authorization.router)
+app.include_router(auth.router)
+app.include_router(password_reset.router)
+app.include_router(send_email.router)

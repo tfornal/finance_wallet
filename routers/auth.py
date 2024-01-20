@@ -14,18 +14,17 @@ import re
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
-
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-router = APIRouter(prefix="/authorization", tags=["authorization"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 SECRET_KEY = "ac9cfe2bb4a5036d00c472681c0ec91041a0a6eb88f817cb59d5e2a3071ff5cd"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 100
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="authorization/token")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 templates = Jinja2Templates(directory="templates")
 
@@ -72,15 +71,7 @@ async def login_for_access_token(
 ):
     user = authenticate_user(form_data.email, form_data.password, db)
     if not user:
-        # return False
-        # # raise HTTPException(
-        # #     status_code=status.HTTP_401_UNAUTHORIZED, detail="User validation failed."
-        # # )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise HTTPException(status_code=401, detail="Invalid user email or password.")
     token = create_access_token(
         user.username, user.user_id, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
@@ -109,7 +100,7 @@ async def login(request: Request, db: Session = Depends(get_db)):
                 "login.html", {"request": request, "msg": msg}
             )
         return response
-    except HTTPException as e:
+    except HTTPException:
         msg = "Unknown error"
         return templates.TemplateResponse(
             "login.html", {"request": request, "msg": msg}
@@ -148,23 +139,41 @@ def check_password_strength(password):
     return bool(pattern.match(password))
 
 
-async def get_current_user(
-    request: Request,
-):
+async def get_current_user(request: Request):
     try:
         token = request.cookies.get("access_token")
         if token is None:
             return None
+
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
+        expiration: int = payload.get("exp", 0)
+
+        current_time = datetime.utcnow().timestamp()
+        if current_time > expiration:
+            # Token has expired, perform logout
+            await logout(request)
+            return None
+
         if username is None or user_id is None:
-            logout(request)
+            await logout(request)
+            return None
+
         return {"username": username, "id": user_id}
     except JWTError:
-        return
-        # raise HTTPException(status_code=404, detail="Not founddddddddddd")
-        # return RedirectResponse(url="/login", status_code=302)
+        await logout(request)
+        return None
+
+
+@router.get("/logout", response_class=JSONResponse)
+async def logout(request: Request):
+    msg = "Logout successful"
+    response = templates.TemplateResponse(
+        "login.html", {"request": request, "msg": msg}
+    )
+    response.delete_cookie(key="access_token")
+    return response
 
 
 @router.get("/logout", response_class=JSONResponse)
@@ -220,3 +229,8 @@ async def register_user(
     msg = "User successfully created!"
 
     return templates.TemplateResponse("login.html", {"request": request, "msg": msg})
+
+
+@router.get("/reset_password", response_class=HTMLResponse)
+async def authentication_page(request: Request):
+    return templates.TemplateResponse("reset_password.html", {"request": request})

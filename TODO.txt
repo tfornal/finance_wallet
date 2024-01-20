@@ -7,3 +7,5 @@ jedna duza, cyfre, 1 znak specjalny;
 bo ta wartosc z defaultu bedzie odczytywana z tabeli crypto; do poprawy
 - wyszukiwarka w list of your exp[enses]
 - dodanie automatycznego odnowienia expiration date jesli jest aktywnosc, jesli nie, to po 10 minutach wylogowac???
+
+-0 dodawanie i usuwanie transakcji z tokenow - dodac taka opcje; podobnie jak w coiungecko

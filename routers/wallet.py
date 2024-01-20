@@ -16,7 +16,7 @@ from datetime import datetime, date
 from typing import Optional
 
 # from pydantic import BaseModel, Field
-from .authorization import oauth2_bearer, get_current_user
+from .auth import oauth2_bearer, get_current_user
 from typing import Annotated
 
 ### to bedzie ptorzebne gdy bede przechodzil na html
@@ -61,7 +61,7 @@ async def select_by_period(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=302)
+        return RedirectResponse(url="/auth", status_code=302)
 
     start_date = datetime.strptime("2018-11-21", "%Y-%m-%d").date()
     end_date = datetime.strptime("2023-12-01", "%Y-%m-%d").date()
@@ -147,7 +147,7 @@ async def get_expenses_by_user(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=302)
+        return RedirectResponse(url="/auth", status_code=302)
 
     all_expenses = get_expenses_for_user(db, user.get("id"))
 
@@ -203,7 +203,7 @@ async def get_expenses_by_user(
 async def create_expense(request: Request):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     return templates.TemplateResponse(
         "add_expense.html", {"request": request, "user": user}
     )
@@ -220,7 +220,7 @@ async def create_expense_commit(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     expense_model = models.Wallet()
 
     expense_model.title = title
@@ -240,7 +240,7 @@ async def edit_expense(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     expense = db.query(models.Wallet).filter(models.Wallet.id == expense_id).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
@@ -263,7 +263,7 @@ async def edit_expense_commit(
     # breakpoint()
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     expense = db.query(models.Wallet).filter(models.Wallet.id == expense_id).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
@@ -289,7 +289,7 @@ async def delete_expense(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     expense_model = (
         db.query(models.Wallet)
         .filter(models.Wallet.id == expense_id)
@@ -313,7 +313,7 @@ async def get_by_category(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
 
     expense_total = (
         db.query(func.sum(models.Wallet.price))

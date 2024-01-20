@@ -10,7 +10,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
 from pydantic import BaseModel
-from .authorization import get_current_user, hash_password, oauth2_bearer
+from .auth import get_current_user, hash_password, oauth2_bearer
 
 from datetime import datetime, timedelta
 from typing import Annotated
@@ -90,7 +90,7 @@ async def create_user(
 async def change_password(request: Request, db: SessionLocal = Depends(get_db)):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
     user_model = (
         db.query(models.Users).filter(models.Users.user_id == user.get("id")).first()
     )
@@ -155,7 +155,7 @@ async def delete_user(
 ):
     user = await get_current_user(request)
     if user is None:
-        return RedirectResponse(url="/authorization", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
 
     user_to_delete = (
         db.query(models.Users).filter(models.Users.username == username).first()
