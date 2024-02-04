@@ -51,8 +51,7 @@ models.Base.metadata.create_all(bind=engine)
 templates = Jinja2Templates(directory="templates")
 
 
-def plot_pie_chart():
-    ...
+def plot_pie_chart(): ...
 
 
 @router.get("/date")
@@ -201,6 +200,7 @@ async def get_expenses_by_user(
 
 @router.get("/add_expense", response_class=HTMLResponse)
 async def create_expense(request: Request):
+    breakpoint()
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)

@@ -139,12 +139,30 @@ def check_password_strength(password):
     return bool(pattern.match(password))
 
 
+async def get_user_by_token(token):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        user_id: int = payload.get("id")
+        expiration: int = payload.get("exp", 0)
+
+        current_time = datetime.utcnow().timestamp()
+
+        if current_time > expiration:
+            return None
+
+        if username is None or user_id is None:
+            return None
+        return {"username": username, "id": user_id, "exp": expiration}
+    except JWTError:
+        return None
+
+
 async def get_current_user(request: Request):
     try:
         token = request.cookies.get("access_token")
         if token is None:
             return None
-
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
@@ -159,7 +177,6 @@ async def get_current_user(request: Request):
         if username is None or user_id is None:
             await logout(request)
             return None
-
         return {"username": username, "id": user_id}
     except JWTError:
         await logout(request)

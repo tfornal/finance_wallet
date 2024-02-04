@@ -31,7 +31,6 @@ import pandas as pd
 import plotly.express as px
 from fastapi import Depends, Request
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
 import math
 
@@ -48,8 +47,8 @@ def get_db():
         db.close()
 
 
-user_dependency = Annotated[dict, Depends(get_current_user)]
-token_dependency = Annotated[str, Depends(oauth2_bearer)]
+# user_dependency = Annotated[dict, Depends(get_current_user)]
+# token_dependency = Annotated[str, Depends(oauth2_bearer)]
 models.Base.metadata.create_all(bind=engine)
 
 templates = Jinja2Templates(directory="templates")
@@ -139,6 +138,7 @@ def create_pie_chart(df, total_asset_value):
 
 @router.get("/")
 async def get_all_assets(request: Request, db: Session = Depends(get_db)):
+    ### To be corrected;
     user = await get_current_user(request)
     if user is None:
         return RedirectResponse(url="/auth", status_code=302)
@@ -151,18 +151,27 @@ async def get_all_assets(request: Request, db: Session = Depends(get_db)):
         .order_by(models.Assets.asset_value_pln.desc())
         .all()
     )
-
     df = create_assets_dataframe(all_assets)
-    total_asset_value = df["Asset_value"].sum()
-    fig = create_pie_chart(df, total_asset_value)
+    if len(df) > 0:
 
+        total_asset_value = df["Asset_value"].sum()
+        fig = create_pie_chart(df, total_asset_value)
+
+        return templates.TemplateResponse(
+            "assets.html",
+            {
+                "request": request,
+                "user": user,
+                "assets": all_assets,
+                "plot_pie": fig.to_html(),
+            },
+        )
     return templates.TemplateResponse(
         "assets.html",
         {
             "request": request,
             "user": user,
             "assets": all_assets,
-            "plot_pie": fig.to_html(),
         },
     )
 
